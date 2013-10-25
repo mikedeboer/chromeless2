@@ -1,0 +1,22 @@
+<!-- Simple page which uses require Notice the require as injected by the Jetpack Application ( Chromeless ) that exists before this "browser" page exists --> 
+
+<html>
+  <head>
+    <title>WebbyFox</title>
+  </head>
+  <body>
+    <div id="browserHeader">
+      <button onclick="launchGoogle()" >Click me to open  google in a new window</button>
+      <button onclick="launchWindow()" >Click me to open app code in a new window</button>
+    </div>
+  </body>  
+<script>
+  function launchGoogle() { 
+    a = window.open('http://www.google.com');
+  } 
+
+  function launchWindow() { 
+    a = window.open('new_window.html');
+  } 
+</script>
+</html>

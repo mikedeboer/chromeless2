@@ -1,0 +1,336 @@
+<!-- This webpage controls the top level rendering of the browser.  it's
+     the first document that is loaded. and defines the look and feel of
+     the browser.  --> 
+
+<html>
+  <head>
+    <!-- What if the title of the top level document dictated the os level
+         process/application name? -->
+    <title>WebbyFox</title>
+
+    <!-- we can use basic flexbox layout! -->
+
+    <link href="security.css" rel="stylesheet" media="screen, projection">
+    <style type="text/css" media="screen">
+
+body {
+  background-color: #999;
+  padding: 0;
+  margin: 0;
+}
+
+#topCanvasMask { 
+     height:62px;
+     width:100%;
+} 
+
+#browserHeader {
+  -moz-box-shadow: 0 0 10px white, 0 0 20px white; 
+  -moz-border-radius:25px;
+  background-color:white;
+  width: 80%;
+  height:40px;
+  margin:1em;
+  margin-top:0;
+  padding-top:10px;
+  text-align: center;
+}
+
+#browserHeader form { 
+  display:-moz-inline-box;
+  -moz-box-orient:horizontal;
+} 
+
+.toolbarItem { 
+  -moz-box-flex: 1;
+} 
+
+#awesomeBox {
+  font-size: 120%;
+  width:450px;
+  -moz-box-flex:2;
+}
+
+#browserContentArea {
+  -moz-box-flex: 1;
+  -webkit-box-flex: 1;
+  box-flex: 1;
+  display: -moz-box;
+  display: -webkit-box;
+  display: box;
+  margin:1em;
+  margin-top:0;
+  overflow:hidden;
+}
+
+#outer {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  display: -moz-box;
+  display: -webkit-box;
+  display: box;
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
+  box-orient: vertical;
+}
+
+.browser { 
+  box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-box-flex: 1;
+  width: 100%;
+  border:0px; 
+  height: 100%;
+} 
+
+.browser_selected { 
+  display:block;
+} 
+
+.browser_hidden { 
+  display:none;
+} 
+
+#thumbsNavigator { 
+	width:800px;
+	height:62px;
+	text-align:center;
+	overflow:hidden;
+} 
+
+.thumb_img { 
+   opacity:.6;
+   -moz-box-shadow: 0px 5px 15px black;
+   width:30px; 
+   height:30px
+} 
+
+.thumb { 
+   border:2px solid transparent;
+  -moz-box-shadow:0 0 0;
+   overflow:hidden;
+} 
+
+.thumb_selected { 
+  -moz-box-shadow:0 0 20px white;
+} 
+    </style>
+  </head>
+  <body>
+    <div id="outer">
+    <div id="topCanvasMask">
+    <div id="thumbsNavigator">
+    </div>
+    </div>
+    <div id="browserHeader">
+        <form>
+	<input class="toolbarItem" id="awesomeBox"  class="security_insecure" type="text" value="http://www.google.com"></input> 
+	<input class="toolbarItem" type="submit" id="buttonGo"  value="go"></input>
+	<button class="toolbarItem" id="buttonNew" >New</button>
+	<button class="toolbarItem" id="buttonHome" >Home</button>
+	<button class="toolbarItem" id="buttonPersist" >All</button>
+	<button class="toolbarItem" id="buttonFull" >Full</button>
+        </form>
+    </div>
+    <div id="browserContentArea">
+      <!-- what if iframes were how the browser HTML embedded web content?
+           what if a new attribute were introduced which controlled priviledge
+           level of content loaded in an iframe? --> 
+    </div>
+    </div>
+  </body>
+  <!-- Could the browser itself leverage a framework like YUI or jquery?
+       This shouldn't be that much different than slamming YUI into node.js
+       or jquery into jetpacks? -->
+  <script type="text/javascript" src="jquery-min.js"></script>
+  <script type="text/javascript">
+
+const url = require("url");
+const fullscreen = require("fullscreen");
+
+var currentBrowser = null; 
+var browserTabs = new Array();
+var currSelected = null; 
+
+// If you want to try different browser implementations, replace iframe with the 
+// correct DOM element. 
+
+function makeBrowser() { 
+  var browser = document.createElement("iframe");
+  $(browser).addClass("browser");
+  return browser;
+} 
+
+function changeBrowser(browserRef,updateBar) { 
+
+  $(".browser").removeClass("browser_selected");
+  $(".browser").addClass("browser_hidden");
+  $(browserRef).removeClass("browser_hidden");
+  $(browserRef).addClass("browser_selected");
+
+  var refBrowserId = $(browserRef).attr("id");
+  var uniqueId = refBrowserId.split("browser_unique_")[1];
+  if(currSelected != null) { 
+    document.getElementById("thumb_unique_"+currSelected).setAttribute("class","thumb");
+  } 
+  document.getElementById("image_unique_"+uniqueId).setAttribute("class","thumb thumb_selected");
+  currSelected = uniqueId; 
+
+  if(updateBar) { 
+    $("#awesomeBox").attr("value",browserRef.src); 
+  } 
+
+} 
+
+function canvasShot(browserRef, thumbImageRef) { 
+  try { 
+    var camera = require("canvas-proxy");
+    thumbImageRef.width="1";
+    thumbImageRef.height="1";
+    thumbImageRef.src=camera.snapshot(browserRef);
+    console.log("canvasShot");
+  } catch (i) { 
+    console.log(i); 
+  } 
+} 
+
+
+var tabsFixed = new Array(); 
+var tabsIndex =-1;
+
+function newTab() { 
+  tabsIndex++;
+
+  var newBrowser = makeBrowser();
+  browserTabs.push(newBrowser);
+  var uniqueId = Math.random();
+  var browserUnique = "browser_unique_"+uniqueId;
+
+  newBrowser.setAttribute("id",browserUnique);
+
+  newBrowser.addEventListener("ChromelessLoadStart",function (e) { 
+      var refBrowser = browserUnique; 
+      $("#awesomeBox").attr("value",e.target.src); 
+  },false);
+
+  newBrowser.addEventListener("ChromelessDOMSetup",function (e) { 
+      thumbnailUpdate(e.target.getAttribute("id")); 
+  }, false);
+
+  newBrowser.addEventListener("ChromelessLoadStop",function (e) { 
+      thumbnailUpdate(e.target.getAttribute("id"));
+  }, false);
+
+  newBrowser.addEventListener("ChromelessLoadProgress", function (e) {
+      $("#awesomeBox").attr("style","background: url(bg.png) "+parseInt(e.percentage*42)+"px 0px no-repeat");
+  },false);
+
+  newBrowser.addEventListener("ChromelessSecurityChange", function (e) {
+      console.log("ChromelessSecurityChange: " + "security_"+e.state);
+      $("#awesomeBox").removeClass().addClass("security_"+e.state);
+  },false);
+
+  var thumb = document.createElement("span");
+
+  var img = document.createElement("img");
+  thumb.setAttribute("class","thumb");
+  img.setAttribute("class","thumb_img");
+  img.setAttribute("align","top");
+
+  $(img).width("30");
+  $(img).height("30");
+  img.setAttribute("onclick","changeBrowser(document.getElementById('browser_unique_"+uniqueId+"'),true)");
+  thumb.setAttribute("id","thumb_unique_"+uniqueId);
+  img.setAttribute("id","image_unique_"+uniqueId);
+  thumb.appendChild(img);
+
+  document.getElementById("thumbsNavigator").appendChild(thumb);
+  document.getElementById("browserContentArea").appendChild(newBrowser);
+
+  tabsFixed=32*tabsIndex;
+ 
+  changeBrowser(newBrowser);
+
+  currentBrowser = newBrowser;
+
+} 
+
+function updateVisibleBrowser(browserRef) { 
+} 
+
+function thumbnailUpdate(refBrowserId) { 
+  var uniqueId = refBrowserId.split("browser_unique_")[1];
+  canvasShot(document.getElementById(refBrowserId),document.getElementById("image_unique_"+uniqueId));
+} 
+
+function fishEyeOut(e) { 
+
+  $(".thumb img").each(function(i,el) { 
+       el.style.width=32+"px";
+       el.style.height=32+"px";
+  });
+
+} 
+function fishEye(e) { 
+
+	var totalWidth = tabsFixed;
+	var shiftX = parseInt((window.innerWidth-totalWidth)/2);
+	var deltaX = e.clientX-shiftX; 
+
+	var c =-1;
+	$(".thumb").each(function(i,el) { 
+		c++;	
+		var delta = Math.abs(deltaX-c*32); 
+		if(delta>=58) { 
+  			delta=58; 
+		} 
+			$(this).find("img").each(function (i,el) { 
+			el.style.width=90-delta+"px";
+			el.style.height=90-delta+"px";
+			} );
+		
+	});
+} 
+
+$(document).ready(function() {
+
+    //document.getElementById("thumbsNavigator").addEventListener("mousemove",fishEye, false); 
+    $("#thumbsNavigator").mousemove(function(event) { 
+	fishEye(event);
+    });
+    $("#thumbsNavigator").mouseleave(function(event) { 
+	fishEyeOut(event);
+    });
+
+    $("#browserHeader form").submit(function(e) {
+       if(browserTabs.length<1) newTab();  
+       browserUniqueId = $(".browser_selected").attr("id");
+       var fragment = $.trim($("#awesomeBox").val());
+       $(".browser_selected").attr("src", url.guess(fragment));
+       $("#awesomeBox").removeClass().addClass("security_insecure");
+       return false; 
+    });
+    $("#browserHeader #buttonHome").click(function(e) {
+
+        $(".browser_selected").attr("src", url.guess("http://mozillalabs.com"));
+        return false; 
+    });
+    $("#browserHeader #buttonNew").click(function(e) {
+        newTab();
+        $("#awesomeBox").val("");
+        $("#awesomeBox").focus();
+        return false; 
+    });
+    $("#browserHeader #buttonPersist").click(function(e) {
+        $(".browser").removeClass("browser_hidden");
+        return false; 
+    });
+    $("#browserHeader #buttonFull").click(function(e) {
+        fullscreen.toggle(window);
+        return false; 
+    });
+});
+
+  </script>
+</html>

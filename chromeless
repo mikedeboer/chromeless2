@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+
+# A small script to invoke cfx from the jetpack platform with proper arguments.
+# accepts a single argument on the command line which is the path to the
+# "entry point HTML" - that which should be used as the browser's UI.
+
+import os,sys,shutil
+
+# the current chromeless version.  should be bumped when a release is tagged,
+# really we an immutable global accessible by all includes submodules, but
+# using the environment for this seems wonky.  ideas welcome.
+CHROMELESS_VERSION = "0.2";
+
+# set the cuddlefish "root directory" for this process if it's not already
+# set in the environment
+cuddlefish_root = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+if 'CUDDLEFISH_ROOT' not in os.environ:
+    os.environ['CUDDLEFISH_ROOT'] = cuddlefish_root
+
+# set the "build directory", where we'll output built artifacts, download xulrunner,
+# etc.
+build_dir = os.path.join(cuddlefish_root, "build")
+
+# add our own python-lib path to the python module search path.
+python_lib_dir = os.path.join(cuddlefish_root, "impl")
+if python_lib_dir not in sys.path:
+    sys.path.append(python_lib_dir)
+
+# now export to env so sub-processes get it too
+if 'PYTHONPATH' not in os.environ:
+    os.environ['PYTHONPATH'] = python_lib_dir
+elif python_lib_dir not in os.environ['PYTHONPATH'].split(os.pathsep):
+    paths = os.environ['PYTHONPATH'].split(os.pathsep)
+    paths.insert(0, python_lib_dir)
+    os.environ['PYTHONPATH'] = os.pathsep.join(paths)
+
+# given a filename argument, return an absolute path
+def findBrowserHTML(path):
+    # "examples" directory can be omitted, but we'll automatically append it to
+    # verify that file exists.
+    if os.path.isdir(path):
+        if os.path.exists(os.path.join(path, "index.html")):
+            path = os.path.join(path, "index.html")
+        elif os.path.exists(os.path.join(path, "index.xhtml")):
+            path = os.path.join(path, "index.xhtml")
+        elif os.path.exists(os.path.join(path, "index.svg")):
+            path = os.path.join(path, "index.svg")
+    # the path we return must have ui omitted
+    return os.path.abspath(path)
+
+executionMode = "run" 
+
+# We should migrate to optparse
+browserToLaunch = None
+if len(sys.argv) > 1:
+    if sys.argv[1] == "package":
+        executionMode = "package" 
+        print "Packaging a xulrunner application (directory) into build/"
+        if len(sys.argv) > 2:
+            browserToLaunch = findBrowserHTML(sys.argv[2])
+    elif sys.argv[1] == "appify":
+        executionMode = "appify" 
+        print "Generating a standalone, redistributable, application"
+        if len(sys.argv) > 2:
+            browserToLaunch = findBrowserHTML(sys.argv[2])
+    elif sys.argv[1] == "docs":
+        executionMode = "sdocs" 
+        print "Generating documentation"
+    elif sys.argv[1] == "tests":
+        executionMode = "testex" 
+        print "Running Chromeless tests"
+    else:
+        browserToLaunch = findBrowserHTML(sys.argv[1])
+
+if browserToLaunch == None:
+    browserToLaunch = findBrowserHTML("./examples/first_browser/index.html")
+
+# throw an error message if we can't figure out what html file
+# is the browser's HTML entry point
+if not os.path.exists(browserToLaunch):
+    print >>sys.stderr, "can't find browser HTML (tried '"+browserToLaunch+"')"
+    raise SystemExit(1)
+
+import mozfetcher
+f = mozfetcher.Fetcher(build_dir)
+if (f.needs_fetch()):
+    print "Missing prerequisites!  I must download xulrunner to run.  Doing so"
+    f.run()
+
+print "Using Browser HTML at '%s'" % browserToLaunch
+
+import cuddlefish
+import simplejson as json
+
+os.chdir(cuddlefish_root)
+cuddlefish.run([
+        executionMode,
+        "-a", "xulrunner",
+        "-b", f.xulrunner_path(),
+        "--static-args", json.dumps({"browser": browserToLaunch})
+        ])

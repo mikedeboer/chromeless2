@@ -1,0 +1,21 @@
+.security_secure {
+   -moz-transition-property: border;
+   -moz-transition-duration: 1s;
+   -moz-transition-delay: 0s;
+   border: 2px solid green;
+}
+
+.security_broken {
+   -moz-transition-property: border;
+   -moz-transition-duration: 1s;
+   -moz-transition-delay: 0s;
+   border: 2px solid red;
+}
+
+.security_insecure {
+   -moz-transition-property: border;
+   -moz-transition-duration: 1s;
+   -moz-transition-delay: 0s;
+   border: 2px solid yellow;
+}
+

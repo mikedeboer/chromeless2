@@ -1,0 +1,32 @@
+<html>
+  <head>
+   <title>WebbyFox</title>
+   <script type="text/javascript" charset="utf-8">
+    function test() { 
+       console.log('I am just resizing myself');
+       animate();
+    }
+
+    cc=0;
+    function animate() {
+
+       cc+=.1;
+       var i = Math.sin(cc);
+
+       window.innerHeight=300+parseInt(i*200);
+       window.innerWidth=300+parseInt(i*200);
+       setTimeout("animate()",100);
+
+    }
+
+   </script>
+  </head>
+
+  <body onload='test()'>
+
+   <p> 
+
+   </p>
+
+  </body>
+</html>

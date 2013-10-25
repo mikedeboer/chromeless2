@@ -1,0 +1,20 @@
+<html>
+<body>
+<iframe id="theIFrame"></iframe>
+</body>
+<script>
+console.log("no document title set.  window title should now be application title... wait 5s");
+
+setTimeout(function() {
+  document.title = "new title!";
+  document.body.appendChild(document.createElement('p'));
+  console.log("Title changed!  now check the window title");
+
+  // now let's embed a document with a different title and ensure that
+  setTimeout(function() {
+    console.log("embedding new iframe, will it change your title?  it shouldn't");
+    document.getElementById("theIFrame").src = "inner.html";
+  }, 2500);
+}, 2500);
+</script>
+</html>

@@ -1,0 +1,151 @@
+<!-- This webpage controls the top level rendering of the browser.  it's
+     the first document that is loaded. and defines the look and feel of
+     the browser.  --> 
+
+<html>
+  <head>
+    <!-- What if the title of the top level document dictated the os level
+         process/application name? -->
+    <title>WebbyFox</title>
+
+<!-- given that we're locked to a recent version of the gecko rendering engine,
+     we can use snazzy modern features like flexbox layout. -->
+    <style type="text/css" media="screen">
+
+body {
+  background-color: #999;
+  padding: 0;
+  margin: 0;
+}
+
+#browserHeader {
+  width: 100%;
+  text-align: center;
+  padding:2px;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+}
+
+#browserContentArea {
+  -moz-box-flex: 1;
+  display: -moz-box;
+  border: 1px solid green;
+}
+
+#contentFrame {
+  border: 1px solid blue;
+  -moz-box-flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+#browserHeader > div {
+  margin-right: 2px;
+  margin-left: 2px;
+}
+
+#urlbox {
+  -moz-box-flex: 1;
+}
+
+#urlbox form {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+#urlinput {
+ width: 100%;
+ padding: 2px;
+ font-size: .8em;
+}
+
+#outer {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+}
+    </style>
+  </head>
+  <body>
+    <div id="outer">
+    <div id="browserHeader">
+      <div><button id="back">&lt;&lt</button></div>
+      <div><button id="forward">&gt;</button></div>
+      <div><button id="reload">R</button></div>
+      <div id="urlbox"><form><input id="urlinput" type="text" /></form></div>
+      <div id="go"><button id="go">go</button></div>
+      <div id="stop"><button id="stop">stop</button></div>
+    </div>
+    <div id="browserContentArea">
+      <!-- what if iframes were how the browser HTML embedded web content?
+           what if a new attribute were introduced which controlled priviledge
+           level of content loaded in an iframe? --> 
+      <iframe id="contentFrame" privilege="content"></iframe>
+    </div>
+    </div>
+  </body>
+  <!-- Could the browser itself leverage a framework like YUI or jquery?
+       This shouldn't be that much different than slamming YUI into node.js
+       or jquery into jetpacks? -->
+  <script type="text/javascript" src="jquery-min.js"></script>
+  <script type="text/javascript">
+
+const url = require("url");
+// in memory browser history, an array of urls
+var gHistory = [];
+// our current point in history
+var gCurrent = 0;
+
+// capture events when the a child iframe changes and update the location bar
+document.getElementById('contentFrame').addEventListener("ChromelessLoadStart", function(e) {
+  $("#urlinput").val(e.url);
+  // very rudimentary history management, if the url that has been loaded
+  // is not what is currently in history, let's append it, and reset
+  // the history pointer
+  if (e.url !== gHistory[gCurrent]) {
+    gHistory.push(e.url);
+    gCurrent = gHistory.length - 1; 
+  }
+}, false, true);
+
+// the ready handler would run once the browser process was initialized?
+$(document).ready(function() {
+
+    function stop () { 
+      var frame = document.getElementById("contentFrame");
+      require("web-content").stopload(frame);
+    } 
+
+    function navigate() {
+        // invoked when the user hits the go button or hits enter in url box
+        var input = $.trim($("#urlinput").val());
+        // let's try to turn user input into a well formed url using the
+        // 'url' library's guess function.
+        input = url.guess(input);
+
+        // now trigger navigation
+        $("#contentFrame").attr("src", input);
+    }
+
+    // both enter in the urlbox and clicking the go button do the same thing,
+    // navigate to the url specified
+    $("#urlbox > form").submit(function() { navigate(); return false; });
+    $("#go").click(function() { navigate(); });
+    $("#stop").click(function() { stop(); });
+    // reload and go are equivalent.  desired?
+    $("#reload").click(function() { navigate(); });
+    $("#back").click(function() {
+      if (gCurrent == 0) return;
+      $("#contentFrame").attr("src", gHistory[--gCurrent]);
+    });
+    $("#forward").click(function() {
+      if (!gHistory.length || gCurrent == gHistory.length - 1) return;
+      $("#contentFrame").attr("src", gHistory[++gCurrent]);
+    });
+});
+
+  </script>
+</html>
