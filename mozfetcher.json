@@ -1,0 +1,40 @@
+{
+  "linux": {
+    "x64": {
+      "url": "http://releases.mozilla.org/pub/mozilla.org/xulrunner/releases/6.0.2/runtimes/xulrunner-6.0.2.en-US.linux-x86_64.tar.bz2",
+      "md5": "a1e98013cbb4d9685461465e09b3c7c7",
+      "bin": {
+        "path": "xulrunner/xulrunner",
+        "sig": "e473d9a27a10b9bf1ffb1bd8a3e6d668"
+      }
+    },
+    "x32": {
+      "url": "http://releases.mozilla.org/pub/mozilla.org/xulrunner/releases/6.0.2/runtimes/xulrunner-6.0.2.en-US.linux-i686.tar.bz2",
+      "md5": "b348164d69ab9d1b226e98a4893029f2",
+      "bin": {
+        "path": "xulrunner/xulrunner",
+        "sig": "e473d9a27a10b9bf1ffb1bd8a3e6d668"
+      }
+    }
+  },
+  "darwin": {
+    "all": {
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/25.0b12/sdk/xulrunner-25.0b12.en-US.mac-x86_64.sdk.tar.bz2",
+      "md5": "f601249c0eb9aa73e16f2398e77a9c3b",
+      "bin": {
+        "path": "xulrunner-sdk/bin/XUL.framework/Versions/Current/xulrunner",
+        "sig": "7592f13920fe79bf62940762ea2e7296"
+      }
+    }
+  },
+  "win": {
+    "all": {
+      "url": "http://releases.mozilla.org/pub/mozilla.org/xulrunner/releases/6.0.2/runtimes/xulrunner-6.0.2.en-US.win32.zip",
+      "md5": "173502a8f48d8eb74baa9c7326d91733",
+      "bin": {
+          "path": "xulrunner/xulrunner.exe",
+          "sig": "0f7b375432357138ff6a1127d54a8403"
+      }
+    }
+  }
+}
