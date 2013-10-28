@@ -32,8 +32,8 @@
       "url": "http://releases.mozilla.org/pub/mozilla.org/xulrunner/releases/6.0.2/runtimes/xulrunner-6.0.2.en-US.win32.zip",
       "md5": "173502a8f48d8eb74baa9c7326d91733",
       "bin": {
-          "path": "xulrunner/xulrunner.exe",
-          "sig": "0f7b375432357138ff6a1127d54a8403"
+        "path": "xulrunner/xulrunner.exe",
+        "sig": "0f7b375432357138ff6a1127d54a8403"
       }
     }
   }
