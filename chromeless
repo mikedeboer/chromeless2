@@ -2,9 +2,11 @@
 
 var Path = require("path");
 var Fs = require("fs");
+var Multi = require("multimeter");
 
 var Util = require("./lib/util");
 var Mozfetcher = require("./lib/mozfetcher");
+var Moztarball = require("./lib/moztarball");
 
 // A small script to invoke cfx from the jetpack platform with proper arguments.
 // accepts a single argument on the command line which is the path to the
@@ -65,17 +67,45 @@ if (!Fs.existsSync(browserToLaunch)) {
   process.exit(1);
 }
 
-var fetcher = new Mozfetcher(build_dir);
-fetcher.fetchIfNeeded(function(err, archive) {
+var multi = Multi(process);
+var fetcher = new Mozfetcher(build_dir, multi);
+fetcher.fetchIfNeeded(function(err, tarball) {
   if (err) {
     console.error(err);
     process.exit(1);
   }
   
-  fetcher.unpack(fetcher.getArchivePath(), function(err) {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-  });
+  if (tarball) {
+    new Moztarball(build_dir, multi).unpack(tarball || fetcher.getArchivePath(), function(err) {
+      if (err) {
+        console.error(err);
+        process.exit(1);
+      }
+      // If after all that we still think we need to fetch the thing,
+      // that means unpacked bits don't match expected signatures.
+      // safest to purge them from disk and/or refuse to run
+      fetcher.needsFetch(function(err, needsFetch, msg) {
+        if (!err && needsFetch) {
+          err = "Signature mismatch in unpacked xulrunner contents.  Eep!\n" +
+                (msg || "");
+        }
+        if (err) {
+          console.error(err);
+          process.exit(1);
+        }
+        run();
+      });
+    });
+  } else {
+    run();
+  }
+
+  function run() {
+    // DONE! Alright, now can finally start doing something interesting...
+    var xulrunner = fetcher.getXulrunnerPath();
+    console.log("READY TO ROLL...\n  " + executionMode + "\n  " +
+                browserToLaunch + "\n  " + xulrunner);
+
+    multi.destroy();
+  }
 });
