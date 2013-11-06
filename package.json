@@ -18,7 +18,6 @@
     "node": ">=0.10.0"
   },
   "dependencies": {
-    "optimist": "~0.6.0",
     "mkdirp": "~0.3.5",
     "multimeter": "~0.1.1",
     "tar": "~0.1.18",

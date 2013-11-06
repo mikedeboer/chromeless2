@@ -7,6 +7,26 @@ var Multi = require("multimeter");
 var Util = require("./lib/util");
 var Mozfetcher = require("./lib/mozfetcher");
 var Moztarball = require("./lib/moztarball");
+var Build = require("./lib/build");
+
+var multi = Multi(process);
+
+// Exit handler
+function onExit(ex) {
+  Util.log("Exiting...");
+  if (multi)
+    multi.destroy();
+  if (ex)
+    throw ex;
+}
+process.on("exit", onExit);
+process.on("UncaughtException", onExit);
+
+function exitWithError(err, code) {
+  if (err)
+    Util.log(err, "error");
+  process.exit(code || 1);
+}
 
 // A small script to invoke cfx from the jetpack platform with proper arguments.
 // accepts a single argument on the command line which is the path to the
@@ -14,11 +34,11 @@ var Moztarball = require("./lib/moztarball");
 
 // set the cuddlefish "root directory" for this process if it's not already
 // set in the environment
-var cuddlefish_root = process.cwd();
+var cwd = process.cwd();
 
 // set the "build directory", where we'll output built artifacts, download xulrunner,
 // etc.
-var build_dir = Path.join(cuddlefish_root, "build");
+var build_dir = Path.join(cwd, "build");
 
 var executionMode = "run";
 
@@ -31,23 +51,23 @@ if (argc > 1) {
   switch (argv[1]) {
     case "package":
       executionMode = "package";
-      console.log("Packaging a xulrunner application (directory) into build/");
+      Util.log("Packaging a xulrunner application (directory) into build/");
       if (arc > 2)
         browserToLaunch = Util.findBrowserHTML(argv[2]);
       break;
     case "appify":
       executionMode = "appify";
-      console.log("Generating a standalone, redistributable, application");
+      Util.log("Generating a standalone, redistributable, application");
       if (argc > 2)
         browserToLaunch = Util.findBrowserHTML(argv[2]);
       break;
     case "docs":
       executionMode = "sdocs";
-      console.log("Generating documentation");
+      Util.log("Generating documentation");
       break;
     case "tests":
       executionMode = "testex";
-      console.log("Running Chromeless tests");
+      Util.log("Running Chromeless tests");
       break;
     default:
       browserToLaunch = Util.findBrowserHTML(argv[1]);
@@ -56,43 +76,35 @@ if (argc > 1) {
 }
 
 if (!browserToLaunch) {
-  browserToLaunch = Util.findBrowserHTML(Path.join(cuddlefish_root, "examples",
+  browserToLaunch = Util.findBrowserHTML(Path.join(cwd, "examples",
     "first_browser", "index.html"));
 }
 
-// Throw an error message if we can't figure out what html file
-// is the browser's HTML entry point
-if (!Fs.existsSync(browserToLaunch)) {
-  console.error("Can't find browser HTML (tried '" + browserToLaunch + "')");
-  process.exit(1);
-}
+// Throw an error message if we can't figure out what html file is the browser's
+// HTML entry point
+if (!Fs.existsSync(browserToLaunch))
+  exitWithError("Can't find browser HTML (tried '" + browserToLaunch + "')");
 
-var multi = Multi(process);
 var fetcher = new Mozfetcher(build_dir, multi);
 fetcher.fetchIfNeeded(function(err, tarball) {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  
+  if (err)
+    exitWithError(err);
+
   if (tarball) {
     new Moztarball(build_dir, multi).unpack(tarball || fetcher.getArchivePath(), function(err) {
-      if (err) {
-        console.error(err);
-        process.exit(1);
-      }
-      // If after all that we still think we need to fetch the thing,
-      // that means unpacked bits don't match expected signatures.
-      // safest to purge them from disk and/or refuse to run
+      if (err)
+        exitWithError(err);
+
+      // If after all that we still think we need to fetch the thing, that means
+      // unpacked bits don't match expected signatures. Safest to purge them
+      // from disk and/or refuse to run.
       fetcher.needsFetch(function(err, needsFetch, msg) {
         if (!err && needsFetch) {
           err = "Signature mismatch in unpacked xulrunner contents.  Eep!\n" +
                 (msg || "");
         }
-        if (err) {
-          console.error(err);
-          process.exit(1);
-        }
+        if (err)
+          exitWithError(err);
         run();
       });
     });
@@ -103,9 +115,12 @@ fetcher.fetchIfNeeded(function(err, tarball) {
   function run() {
     // DONE! Alright, now can finally start doing something interesting...
     var xulrunner = fetcher.getXulrunnerPath();
-    console.log("READY TO ROLL...\n  " + executionMode + "\n  " +
-                browserToLaunch + "\n  " + xulrunner);
+    Util.log("READY TO ROLL...\n  " + executionMode + "\n  " +
+             browserToLaunch + "\n  " + xulrunner);
 
-    multi.destroy();
+    // TODO: make the dependent on the CLI flags.
+    Build.appify(build_dir, multi, function(err) {
+      process.exit();
+    });
   }
 });
