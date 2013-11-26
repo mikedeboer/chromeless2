@@ -1,0 +1,7 @@
+component {6724fc1b-3ec4-40e2-8583-8061088b3185} components/app-startup.js
+contract @mozilla.org/sdk/app-startup;1 {6724fc1b-3ec4-40e2-8583-8061088b3185}
+category app-startup sdk @mozilla.org/sdk/app-startup;1
+
+resource sdk components/
+
+content chromeless chromeless/content/

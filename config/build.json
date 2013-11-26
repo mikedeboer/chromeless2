@@ -1,0 +1,24 @@
+{
+  "modules": {
+    "addon-sdk": {
+      "path": ["addon-sdk", "lib", "sdk"],
+      "exclude": ["addon-page.js", "context-menu.js",
+                  "hotkeys.js", "l10n.js", "notifications.js", "page-mod.js",
+                  "page-worker.js", "panel.js", "passwords.js", "private-browsing.js",
+                  "selection.js", "simple-prefs.js", "tabs.js", "test.js", "ui.js",
+                  "widget.js", "windows.js",
+                  "addon", "browser", "content", "dom", "frame", "keyboard",
+                  "l10n", "loader", "page-mod", "panel", "passwords", "places",
+                  "preferences", "private-browsing", "tab", "tabs", "test", "ui",
+                  "view", "window", "windows", "worker"],
+      "include": [
+        ["addon-sdk", "lib", "toolkit", "loader.js"]
+      ]
+    },
+    "sdk": {
+      "path": ["sdk"],
+      "exclude": [],
+      "include": []
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "jetpackID": "[%uuid%]",
+  "bundleID": "[%uuid%]",
+  "logFile": "[%logfile%]",
+  "bootstrap": {
+    "classID": "{[%uuid%]}",
+    "contractID": "@mozilla.org/harness-service;1?id=[%uuid%]"
+  },
+  "loader": "resource://[%uuid%]-addon-sdk/loader.js",
+  "paths": {
+    "": "resource://[%uuid%]-addon-sdk/",
+    "sdk/": "resource://[%uuid%]-sdk/"
+  },
+  "resources": {
+    "[%uuid%]-addon-sdk": ["modules", "[%uuid%]-addon-sdk"],
+    "[%uuid%]-sdk": ["modules", "[%uuid%]-sdk"]
+  },
+  "mainModule": "sdk/main",
+  "staticArgs": {
+    "browser": "app_code/index.html"
+  },
+  "mappings": {
+    "path": "fs/path"
+  }
+}

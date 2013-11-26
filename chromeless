@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+"use strict";
 
 var Path = require("path");
 var Fs = require("fs");
@@ -38,60 +43,57 @@ var cwd = process.cwd();
 
 // set the "build directory", where we'll output built artifacts, download xulrunner,
 // etc.
-var build_dir = Path.join(cwd, "build");
+var buildDir = Path.join(cwd, "build");
 
 var executionMode = "run";
 
-// We should migrate to optparse
-var browserToLaunch = null
+// TODO: implement better arg parsing and CLI help msg.
+var appToLaunch = null
 var argv = [].concat(process.argv);
 argv.shift();
 var argc = argv.length;
-if (argc > 1) {
+if (argc > 1 && Build.executionModes[argv[1]]) {
+  executionMode = argv[1];
   switch (argv[1]) {
     case "package":
-      executionMode = "package";
       Util.log("Packaging a xulrunner application (directory) into build/");
       if (arc > 2)
-        browserToLaunch = Util.findBrowserHTML(argv[2]);
+        appToLaunch = Util.findBrowserHTML(argv[2]);
       break;
     case "appify":
-      executionMode = "appify";
       Util.log("Generating a standalone, redistributable, application");
       if (argc > 2)
-        browserToLaunch = Util.findBrowserHTML(argv[2]);
+        appToLaunch = Util.findBrowserHTML(argv[2]);
       break;
     case "docs":
-      executionMode = "sdocs";
       Util.log("Generating documentation");
       break;
-    case "tests":
-      executionMode = "testex";
+    case "test":
       Util.log("Running Chromeless tests");
       break;
     default:
-      browserToLaunch = Util.findBrowserHTML(argv[1]);
+      appToLaunch = Util.findBrowserHTML(argv[1]);
       break;
   }
 }
 
-if (!browserToLaunch) {
-  browserToLaunch = Util.findBrowserHTML(Path.join(cwd, "examples",
+if (!appToLaunch) {
+  appToLaunch = Util.findBrowserHTML(Path.join(cwd, "examples",
     "first_browser", "index.html"));
 }
 
 // Throw an error message if we can't figure out what html file is the browser's
 // HTML entry point
-if (!Fs.existsSync(browserToLaunch))
-  exitWithError("Can't find browser HTML (tried '" + browserToLaunch + "')");
+if (!Fs.existsSync(appToLaunch))
+  exitWithError("Can't find browser HTML (tried '" + appToLaunch + "')");
 
-var fetcher = new Mozfetcher(build_dir, multi);
+var fetcher = new Mozfetcher(buildDir, multi);
 fetcher.fetchIfNeeded(function(err, tarball) {
   if (err)
     exitWithError(err);
 
   if (tarball) {
-    new Moztarball(build_dir, multi).unpack(tarball || fetcher.getArchivePath(), function(err) {
+    new Moztarball(buildDir, multi).unpack(tarball || fetcher.getArchivePath(), function(err) {
       if (err)
         exitWithError(err);
 
@@ -115,11 +117,11 @@ fetcher.fetchIfNeeded(function(err, tarball) {
   function run() {
     // DONE! Alright, now can finally start doing something interesting...
     var xulrunner = fetcher.getXulrunnerPath();
-    Util.log("READY TO ROLL...\n  " + executionMode + "\n  " +
-             browserToLaunch + "\n  " + xulrunner);
 
-    // TODO: make the dependent on the CLI flags.
-    Build.appify(build_dir, multi, function(err) {
+    // TODO: make this dependent on the CLI flags.
+    Build.appify(executionMode, xulrunner, appToLaunch, buildDir, multi, function(err) {
+      if (err)
+        exitWithError(err);
       process.exit();
     });
   }

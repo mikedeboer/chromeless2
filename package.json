@@ -1,35 +1,39 @@
 {
+  "engine": {
+    "node": ">=0.10.0"
+  },
   "name": "chromeless2",
-  "version": "2.0.0",
-  "description": "Build desktop applications with web technologies, redux.",
-  "author": "Mike de Boer <mdeboer@mozilla.com>",
   "contributors": [
     {
       "name": "Mike de Boer",
       "email": "mdeboer@mozilla.com"
     }
   ],
-  "homepage": "http://github.com/mikedeboer/chromeless2",
+  "author": "Mike de Boer <mdeboer@mozilla.com>",
   "repository": {
-    "type": "git",
-    "url": "http://github.com/mikedeboer/chromeless2.git"
+    "url": "http://github.com/mikedeboer/chromeless2.git",
+    "type": "git"
   },
-  "engine": {
-    "node": ">=0.10.0"
-  },
+  "version": "2.0.0",
   "dependencies": {
-    "mkdirp": "~0.3.5",
-    "multimeter": "~0.1.1",
-    "tar": "~0.1.18",
     "unzip": "~0.1.9",
-    "seek-bzip": "~1.0.3"
+    "multimeter": "~0.1.1",
+    "mkdirp": "~0.3.5",
+    "tar": "~0.1.18",
+    "rimraf": "~2.2.2",
+    "ncp": "~0.4.2",
+    "async": "~0.2.9",
+    "uuid": "~1.4.1"
   },
-  "main": "./chromeless",
   "scripts": {},
   "licenses": [
     {
-      "type": "The MIT License",
-      "url": "http://www.opensource.org/licenses/mit-license.php"
+      "url": "http://www.opensource.org/licenses/mit-license.php",
+      "type": "The MIT License"
     }
-  ]
+  ],
+  "main": "./chromeless",
+  "homepage": "http://github.com/mikedeboer/chromeless2",
+  "id": "jid1-HJ2eBf2VdjoQdw",
+  "description": "Build desktop applications with web technologies, redux."
 }
