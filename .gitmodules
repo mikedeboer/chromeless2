@@ -1,3 +1,0 @@
-[submodule "modules/addon-sdk"]
-	path = modules/addon-sdk
-	url = https://github.com/mozilla/addon-sdk.git
