@@ -1,0 +1,3 @@
+[submodule "modules/addon-sdk"]
+	path = modules/addon-sdk
+	url = https://github.com/mikedeboer/addon-sdk.git
