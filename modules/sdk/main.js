@@ -42,8 +42,8 @@
 // to the developers HTML browser.
 
 const {Ci, Cc, Cr, Cu} = require("chrome");
-const path = require('path');
-const appinfo = require('sdk/appinfo');
+const path = require("path");
+const appinfo = require("sdk/appinfo");
 
 var appWindow = null;
 
@@ -88,8 +88,8 @@ function enableDebuggingOutputToConsole() {
                     ")\n");
       }
 
-      //return false;   // trigger debugHook
-      return true; //if you do not wish to trigger debugHook
+      // return false; // trigger debugHook
+      return true; // if you do not wish to trigger debugHook
     }
   };
 
@@ -97,7 +97,7 @@ function enableDebuggingOutputToConsole() {
   // it is not well-known why debugHook sometimes fails to trigger 
   jsd.debugHook = {
     onExecute: function(frame, type, rv) {
-      stackTrace = "";
+      let stackTrace = "";
       for (var f = frame; f; f = f.callingFrame) {
         stackTrace += "@ " + f.script.fileName + " at line " + f.line +
                       " function " + f.functionName + "\n";
@@ -109,7 +109,7 @@ function enableDebuggingOutputToConsole() {
   };
 
   jsd.asyncOn(function() {
-      console.log("debugger enabled");
+    console.log("debugger enabled");
   });
 }
 
@@ -118,37 +118,38 @@ function requireForBrowser(moduleName) {
   console.log("browser HTML requires: " + moduleName);
   try {
     return require(moduleName);
-  }
-  catch(e) {
-    console.log("require of '" + moduleName + "' failed: " + e);
+  } catch(ex) {
+    console.log("require of '" + moduleName + "' failed: " + ex.message);
+    console.log(ex.stack);
     // re-throw to the developer to give them an opportunity to handle the error
-    throw e;
+    throw ex;
   }
 }
 
 exports.main = function main(options, testCallbacks) {
-  // access appinfo.json contents for startup parameters
+  // Access appinfo.json contents for startup parameters
   const ai = appinfo.contents;
 
-  var call = options.staticArgs;
+  let call = options.staticArgs;
   const contentWindow = require("sdk/chromeless-sandbox-window");
 
-  var file = path.basename(call.browser);
+  let file = path.basename(call.browser);
 
-  var systemMode = appinfo.contents.enableSystemPrivileges ? true : false;
+  let systemMode = appinfo.contents.enableSystemPrivileges ? true : false;
 
+  let rootPath, startPage;
   if (systemMode) {
-    var rootPath = path.join(call.appBasePath, path.dirname(call.browser));
-    var startPage = require('url').fromFilename(call.appBasePath);
-    var protocol = require("custom-protocol").register("chromeless");
+    rootPath = path.join(call.appBasePath, path.dirname(call.browser));
+    startPage = require("url").fromFilename(call.appBasePath);
+    let protocol = require("custom-protocol").register("chromeless");
     protocol.setHost("main", startPage , "system");
-    var startPage = "chromeless://main/" + call.browser;
+    startPage = "chromeless://main/" + call.browser;
   } else {
     // convert browser url into a resource:// url
     // i.e. 'browser_code/index.html' is mapped to 'resource://app/index.html'
-    var file = path.basename(call.browser);
-    var rootPath = path.join(call.appBasePath, path.dirname(call.browser));
-    var startPage = "resource://app/" + file;
+    let file = path.basename(call.browser);
+    rootPath = path.join(call.appBasePath, path.dirname(call.browser));
+    startPage = "resource://app/" + file;
 
     ios = Cc["@mozilla.org/network/io-service;1"]
             .getService(Ci.nsIIOService),
@@ -178,26 +179,23 @@ exports.main = function main(options, testCallbacks) {
   /* Page window height and width is fixed, it won't be and it also
      should be smart, so HTML browser developer can change it when
      they set inner document width and height */
+  let injectProps = {
+    require: requireForBrowser,
+    exit: function() {
+      console.log("window.exit() called...");
+      appWindow.close();
+      // This is for tests framework to test the window exists or not:
+      appWindow = null;
+    }
+  };
+
   appWindow = new contentWindow.Window({
     url: startPage,
     width: 800,
     height: 600,
     resizable: ai.resizable ? true : false,
     menubar: ai.menubar ? true : false,
-    injectProps : {
-      require: requireForBrowser,
-      console: {
-        log: function() {
-          console.log.apply(console, Array.prototype.slice.call(arguments));
-        }
-      },
-      exit: function() {
-        console.log("window.exit() called...");
-        appWindow.close();
-        appWindow = null; // this is for tests framework to test the window
-        // exists or not
-      }
-    }
+    injectProps : injectProps
   }, testCallbacks);
 };
 

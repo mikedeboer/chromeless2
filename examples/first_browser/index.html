@@ -93,7 +93,9 @@ body {
   <script type="text/javascript" src="jquery-min.js"></script>
   <script type="text/javascript">
 
-const url = require("url");
+var WebContent = require("sdk/web-content");
+console.log("HEY!!");
+
 // in memory browser history, an array of urls
 var gHistory = [];
 // our current point in history
@@ -114,37 +116,37 @@ document.getElementById('contentFrame').addEventListener("ChromelessLoadStart", 
 // the ready handler would run once the browser process was initialized?
 $(document).ready(function() {
 
-    function stop () { 
-      var frame = document.getElementById("contentFrame");
-      require("web-content").stopload(frame);
-    } 
+  function stop () { 
+    var frame = document.getElementById("contentFrame");
+    WebContent.stopload(frame);
+  } 
 
-    function navigate() {
-        // invoked when the user hits the go button or hits enter in url box
-        var input = $.trim($("#urlinput").val());
-        // let's try to turn user input into a well formed url using the
-        // 'url' library's guess function.
-        input = url.guess(input);
+  function navigate() {
+    // invoked when the user hits the go button or hits enter in url box
+    var input = $.trim($("#urlinput").val());
+    // let's try to turn user input into a well formed url using the
+    // 'url' library's guess function.
+    input = WebContent.guessUrl(input);
 
-        // now trigger navigation
-        $("#contentFrame").attr("src", input);
-    }
+    // now trigger navigation
+    $("#contentFrame").attr("src", input);
+  }
 
-    // both enter in the urlbox and clicking the go button do the same thing,
-    // navigate to the url specified
-    $("#urlbox > form").submit(function() { navigate(); return false; });
-    $("#go").click(function() { navigate(); });
-    $("#stop").click(function() { stop(); });
-    // reload and go are equivalent.  desired?
-    $("#reload").click(function() { navigate(); });
-    $("#back").click(function() {
-      if (gCurrent == 0) return;
-      $("#contentFrame").attr("src", gHistory[--gCurrent]);
-    });
-    $("#forward").click(function() {
-      if (!gHistory.length || gCurrent == gHistory.length - 1) return;
-      $("#contentFrame").attr("src", gHistory[++gCurrent]);
-    });
+  // both enter in the urlbox and clicking the go button do the same thing,
+  // navigate to the url specified
+  $("#urlbox > form").submit(function() { navigate(); return false; });
+  $("#go").click(function() { navigate(); });
+  $("#stop").click(function() { stop(); });
+  // reload and go are equivalent.  desired?
+  $("#reload").click(function() { navigate(); });
+  $("#back").click(function() {
+    if (gCurrent == 0) return;
+    $("#contentFrame").attr("src", gHistory[--gCurrent]);
+  });
+  $("#forward").click(function() {
+    if (!gHistory.length || gCurrent == gHistory.length - 1) return;
+    $("#contentFrame").attr("src", gHistory[++gCurrent]);
+  });
 });
 
   </script>

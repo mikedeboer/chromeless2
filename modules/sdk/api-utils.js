@@ -209,7 +209,8 @@ function format(f) {
 }
 
 exports.inspect = function(obj, depth, parentsKey) {
-  if (!obj) return;
+  if (!obj)
+    return;
 
   let out = [],
       cons = obj.constructor,
