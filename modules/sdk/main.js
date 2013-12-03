@@ -113,7 +113,6 @@ function enableDebuggingOutputToConsole() {
   });
 }
 
-
 function requireForBrowser(moduleName) {
   console.log("browser HTML requires: " + moduleName);
   try {

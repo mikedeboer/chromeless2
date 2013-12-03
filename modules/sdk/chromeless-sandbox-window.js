@@ -1,4 +1,5 @@
 const {Cc, Ci, Cu} = require("chrome");
+const global = this;
 
 let gWindows = [];
 
@@ -49,32 +50,30 @@ function injectProperties(sandbox, props, ns = kDefaultNs) {
                        (ns == kDefaultNs ? "" : ns + ".") + propName);
     }
   } else {
-    if (type == "function")
-      sandbox.importFunction(props, ns);
-    else
-      sandbox[ns] = props;
+    sandbox[ns] = props;
     if (ns != kDefaultNs)
       attachPropertyToWindow(sandbox, ns);
   }
 }
 
 let checkWindows = function(subject, url) {
-  if (subject.window.top != subject.window.self) {
-    if (isTopLevelWindow(subject.window.parent)) {
+  let window = subject.window;
+  if (window.top != window.self) {
+    if (isTopLevelWindow(window.parent)) {
       // top level iframe window
-      let ifWin = subject.window.self;
+      let ifWin = window.self;
       ifWin.wrappedJSObject.eval("window.top = window.self");
       ifWin.wrappedJSObject.eval("window.parent = window.self");
     } else {
       // this is a frame nested underneath the top level frame
-      let ifWin = subject.window.self;
+      let ifWin = window.self;
       ifWin.wrappedJSObject.eval("window.top = window.parent.top");
     }
-  } else if (isTopLevelWindow(subject.window)) {
+  } else if (isTopLevelWindow(window)) {
     // this is application code!  let's handle injection at this point.
     let i;
     for (i = 0; i < gWindows.length; i++) {
-      if (gWindows[i]._browser && gWindows[i]._browser.contentWindow == subject.window)
+      if (gWindows[i]._browser && gWindows[i]._browser.contentWindow == window)
         break;
     }
 
@@ -85,13 +84,22 @@ let checkWindows = function(subject, url) {
       require("sdk/prevent-navigation");
 
       if (wo.options.injectProps) {
+        // let window = subject.wrappedJSObject;
+        // for (let propName in wo.options.injectProps) {
+        //   window[propName] = wo.options.injectProps[propName];
+        // }
         let sandbox = Cu.Sandbox(
-          Cc["@mozilla.org/systemprincipal;1"]
-            .createInstance(Ci.nsIPrincipal)
+          Cc["@mozilla.org/systemprincipal;1"].createInstance(Ci.nsIPrincipal),
+          {wantXrays: false, sameGroupAs: global}
         );
 
         sandbox.window = subject.wrappedJSObject;
-        injectProperties(sandbox, wo.options.injectProps);
+        //injectProperties(global, wo.options.injectProps);
+        for (var k in wo.options.injectProps) {
+          sandbox[k] = wo.options.injectProps[k];
+
+          Cu.evalInSandbox("window."+k+" = "+k+";", sandbox);
+        }
       }
     }
   }
