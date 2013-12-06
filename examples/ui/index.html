@@ -33,7 +33,9 @@
         </style>
         <script type="text/javascript" src="async.js"></script>
         <script type="text/javascript">
-            var ui = require("ui");
+            console.error("Components?? " + typeof Components);
+            var ui = require("sdk/ui");
+            var menu = require("sdk/menu");
             
             function inspect(o) {
                 var s = "";
@@ -45,7 +47,6 @@
             function start() {}
             
             function showNotification() {
-                
                 ui.showNotification("Sample Notification", "Contents of the notification!", null, true, function() {
                     alert("Notification clicked!");
                 }, function() {
@@ -70,9 +71,73 @@
                 var icon = document.location.href.replace("index.html", "") + "firefox.ico";
                 ui.addTray(icon, "UI Kit");
             }
-            
+
+            // a generic handler
+            function loggit(x) {
+              console.log("thanks for clicking");
+            }
+
+            var menuBar = ui.getMenu();
+            while (menuBar.firstChild)
+                menuBar.removeChild(menuBar.firstChild);
+
+            var file = menu.Menu({
+                parent: menuBar,
+                label: "File",
+                children: [
+                    menu.Menu({
+                        label: "New Window",
+                        hotkey: "accel-n",
+                        type: "radio",
+                        checked: true,
+                        onClick: function(e) {
+                            alert("yay!");
+                        }
+                    }),
+                    menu.Menu({
+                        label: "New Tab",
+                        children: [
+                            menu.Menu({ label: "In the current window",
+                                        onClick: loggit}),
+                            menu.Menu({ label: "In a new window", onClick: loggit})
+                        ]
+                    })
+                ]
+            });
+
+            var view = menu.Menu({
+                parent: menuBar,
+                label: "View",
+                children: [
+                    menu.Menu({ label: "Navigation Toolbar" }),
+                    menu.Menu({ label: "Bookmarks Toolbar", hotkey: "accel-d", image: "resource://app/icons/favorite.png" }),
+                    menu.Menu({ label: "Add-on Bar", disabled: true }),
+                    menu.Separator(),
+                    menu.Menu({ label: "Tabs On Top" })
+                ]
+            });
+
+            console.log(ui.getMenu().outerHTML);
+
             function addMenu() {
-                ui.getMenu();
+                console.log("VIEW:: " + Object.keys(view));
+                view.children.splice(0, 1);
+                view.children.splice(-1, 0, menu.Menu({ label: "About..." }));
+                view.children.sort(function(a, b) {
+                    a = a.label;
+                    b = b.label;
+                    if (a.label == "-")
+                        return 0;
+                    if (a.label < b.label)
+                       return -1;
+                    if (a.label > b.label)
+                       return 1;
+                    // a must be equal to b
+                    return 0;
+                });
+                view.children[0].onclick = function() {
+                    alert("What are you looking at?!");
+                };
             }
         </script>
     </head>

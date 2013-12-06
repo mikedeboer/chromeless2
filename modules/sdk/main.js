@@ -45,7 +45,21 @@ const {Ci, Cc, Cr, Cu} = require("chrome");
 const path = require("path");
 const appinfo = require("sdk/appinfo");
 
-var appWindow = null;
+function genPropDesc(value) {
+  return {
+    enumerable: true, configurable: true, writable: true, value: value
+  };
+}
+
+function descriptor(object) {
+  let value = {};
+  Object.getOwnPropertyNames(object).forEach(function(name) {
+    value[name] = Object.getOwnPropertyDescriptor(object, name)
+  });
+  return value;
+}
+
+let appWindow = null;
 
 // These functions are used from the test application.
 /*
@@ -64,14 +78,14 @@ exports.getAppBrowser = function () {
 }
 
 function enableDebuggingOutputToConsole() {
-  var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"]
+  let jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"]
               .getService(Ci.jsdIDebuggerService);
 
   jsd.errorHook = {
     onError: function(message, fileName, lineNo, colNo, flags, errnum, exc) {
       // check message type
-      var jsdIErrorHook = Ci.jsdIErrorHook;
-      var messageType;
+      let jsdIErrorHook = Ci.jsdIErrorHook;
+      let messageType;
       if (flags & jsdIErrorHook.REPORT_ERROR)
         messageType = "Error";
       if (flags & jsdIErrorHook.REPORT_WARNING)
@@ -98,7 +112,7 @@ function enableDebuggingOutputToConsole() {
   jsd.debugHook = {
     onExecute: function(frame, type, rv) {
       let stackTrace = "";
-      for (var f = frame; f; f = f.callingFrame) {
+      for (let f = frame; f; f = f.callingFrame) {
         stackTrace += "@ " + f.script.fileName + " at line " + f.line +
                       " function " + f.functionName + "\n";
       }
@@ -113,10 +127,15 @@ function enableDebuggingOutputToConsole() {
   });
 }
 
-function requireForBrowser(moduleName) {
+function requireForBrowser(moduleName, context = this) {
   console.log("browser HTML requires: " + moduleName);
   try {
     return require(moduleName);
+    // let exports = require(moduleName);
+    // let scopedExports = Cu.createObjectIn(context);
+    // Object.defineProperties(scopedExports, descriptor(exports));
+    // Cu.makeObjectPropsNormal(scopedExports);
+    // return scopedExports;
   } catch(ex) {
     console.log("require of '" + moduleName + "' failed: " + ex.message);
     console.log(ex.stack);
@@ -140,7 +159,7 @@ exports.main = function main(options, testCallbacks) {
   if (systemMode) {
     rootPath = path.join(call.appBasePath, path.dirname(call.browser));
     startPage = require("url").fromFilename(call.appBasePath);
-    let protocol = require("custom-protocol").register("chromeless");
+    let protocol = require("sdk/custom-protocol").register("chromeless");
     protocol.setHost("main", startPage , "system");
     startPage = "chromeless://main/" + call.browser;
   } else {
@@ -178,23 +197,28 @@ exports.main = function main(options, testCallbacks) {
   /* Page window height and width is fixed, it won't be and it also
      should be smart, so HTML browser developer can change it when
      they set inner document width and height */
-  let injectProps = {
-    require: requireForBrowser,
-    exit: function() {
-      console.log("window.exit() called...");
-      appWindow.close();
-      // This is for tests framework to test the window exists or not:
-      appWindow = null;
-    }
-  };
-
   appWindow = new contentWindow.Window({
     url: startPage,
     width: 800,
     height: 600,
     resizable: ai.resizable ? true : false,
     menubar: ai.menubar ? true : false,
-    injectProps : injectProps
+    injectProps : {
+      require: requireForBrowser,
+      exit: function() {
+        console.log("window.exit() called...");
+        appWindow.close();
+        // This is for tests framework to test the window exists or not:
+        appWindow = null;
+      }
+      // require: genPropDesc(requireForBrowser),
+      // exit: genPropDesc(function() {
+      //   console.log("window.exit() called...");
+      //   appWindow.close();
+      //   // This is for tests framework to test the window exists or not:
+      //   appWindow = null;
+      // })
+    }
   }, testCallbacks);
 };
 

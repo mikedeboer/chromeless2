@@ -38,6 +38,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+"use strict";
+
 // The possible return values of getTypeOf.
 const VALID_TYPES = [
   "array",
@@ -49,6 +51,23 @@ const VALID_TYPES = [
   "string",
   "undefined"
 ];
+
+function descriptor(object) {
+  let value = {};
+  Object.getOwnPropertyNames(object).forEach(function(name) {
+    value[name] = Object.getOwnPropertyDescriptor(object, name)
+  });
+  return value;
+}
+
+function override(target, source) {
+  let properties = descriptor(target)
+  let extension = descriptor(source || {})
+  Object.getOwnPropertyNames(extension).forEach(function(name) {
+    properties[name] = extension[name];
+  });
+  return Object.defineProperties({}, properties);
+}
 
 /**
  * Returns a function C that creates instances of privateCtor.  C may be called
@@ -64,12 +83,11 @@ const VALID_TYPES = [
  */
 exports.publicConstructor = function publicConstructor(privateCtor) {
   function PublicCtor() {
-    let obj = { constructor: PublicCtor, __proto__: PublicCtor.prototype };
-    memory.track(obj, privateCtor.name);
+    let obj = override({ constructor: PublicCtor }, PublicCtor.prototype );
     privateCtor.apply(obj, arguments);
     return obj;
   }
-  PublicCtor.prototype = { __proto__: privateCtor.prototype };
+  PublicCtor.prototype = override({}, privateCtor.prototype);
   return PublicCtor;
 };
 
@@ -182,90 +200,3 @@ function requirementError(key, requirement) {
   }
   return new Error(msg);
 }
-
-var formatRegExp = /%[sdj]/g;
-function format(f) {
-  let i = 1,
-      args = arguments;
-  let str = String(f).replace(formatRegExp, function(x) {
-    switch (x) {
-      case '%s': return String(args[i++]);
-      case '%d': return Number(args[i++]);
-      case '%j': 
-        let val;
-        //++i;
-        try {
-            val = JSON.stringify(args[i]);
-        }
-        catch (ex) {
-            val = String(args[i]) || '[' + ex.message + ']';
-        }
-        return typeof val == "undefined"  ? String(args[i]) : val;
-      default:
-        return x;
-    }
-  });
-  return str;
-}
-
-exports.inspect = function(obj, depth, parentsKey) {
-  if (!obj)
-    return;
-
-  let out = [],
-      cons = obj.constructor,
-      name = cons ? cons.name : "undefined",
-      proto = Object.getPrototypeOf(obj),
-      depth = depth || 0,
-      indent = Array(depth + 1).join('  ');
-
-  if (0 == depth) {
-    if ('function' == typeof obj) {
-      name = '[' + name + ': ' + obj.name + ']';
-    } else {
-      name = '[' + name + ']';
-    }
-    out.push(format(indent + '\033[33m%s\033[0m', name));
-  } else {
-    out.push(format(indent + '\033[90m.%s\033[0m \033[33m[%s]\033[0m', parentsKey, name));
-  }
-
-  Object.keys(obj).sort().forEach(function(key){
-    let desc;
-    try {
-      desc = Object.getOwnPropertyDescriptor(obj, key);
-    }
-    catch (ex) {
-      out.push(format(indent + '  \033[90m.%s [object WrappedNative]\033[0m', key));
-    }
-    if (!desc)
-      return;
-    if (desc.get)
-      out.push(format(indent + '  \033[90m.%s\033[0m', key));
-    if (desc.set)
-      out.push(format(indent + '  \033[90m.%s=\033[0m', key));
-    if ('function' == typeof desc.value) {
-      let str = String(desc.value);
-          params = str.match(/^function *\((.*?)\)/),
-          val = params
-            ? params[1].split(/ *, */).map(function(param){
-                return '\033[0m' + param + '\033[90m';
-              }).join(', ')
-            : '';
-      out.push(format(indent + '  \033[90m.%s(%s)\033[0m', key, String(val)));
-    }
-    // recurse, unless it's a null object or our depth is > 5
-    else if (desc.value !== null && typeof desc.value === 'object' && (depth < 5)) {
-      var nested = exports.inspect(desc.value, depth + 1, key);
-      out = out.concat(nested);
-    }
-    else {
-      out.push(format(indent + '  \033[90m.%s %s\033[0m', key, desc.value));
-    }
-  });
-
-  let next = exports.inspect(proto, ++depth);
-  if (next)
-    out.push(next);
-  return out.join('\n');
-};

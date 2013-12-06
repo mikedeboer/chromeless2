@@ -72,7 +72,7 @@ if (argc > 1 && Build.executionModes[argv[1]]) {
       Util.log("Running Chromeless tests");
       break;
     default:
-      appToLaunch = Util.findBrowserHTML(argv[1]);
+      appToLaunch = Util.findBrowserHTML(argv[2]);
       break;
   }
 }

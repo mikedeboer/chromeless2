@@ -9,8 +9,8 @@ Cu.import("resource://sdk/console.js");
 
 const Observers = require("deprecated/observer-service");
 
-const kXulNs = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-const kXhtmlNs = "http://www.w3.org/1999/xhtml";
+const kNsXul = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+const kNsXhtml = "http://www.w3.org/1999/xhtml";
 const kAppInfo = require("sdk/appinfo").contents;
 
 const kMenubar = (typeof kAppInfo.menubar == "undefined" || kAppInfo.menubar) ?
@@ -18,42 +18,18 @@ const kMenubar = (typeof kAppInfo.menubar == "undefined" || kAppInfo.menubar) ?
   '<menubar id="theMenuBar" style="padding: 0; border: 0; margin: 0;">' +
   '</menubar></toolbox>' : "";
 const kBlankXul = '<?xml version="1.0"?>' +
-                  '<?xml-stylesheet ' + ' type="text/css"?> ' +
-                  '<window windowtype="navigator:browser" style="padding: 0; ' +
+                  '<?xml-stylesheet ' + 'href="chrome://global/skin/" type="text/css"?>' +
+                  '<?xml-stylesheet ' + 'type="text/css"?> ' +
+                  '<window windowtype="navigator:browser" menu="theMenuBar" style="padding: 0; ' +
                   'border: 0; margin: 0; background-color: white;" xmlns:html="' +
-                  kXhtmlNs + '" xmlns="' + kXulNs + '">' + kMenubar + '</window>';
+                  kNsXhtml + '" xmlns="' + kNsXul + '">' + kMenubar + '</window>';
 
 function isTopLevelWindow(w) {
   for (let i = 0; i < gWindows.length; i++) {
-    if (gWindows[i]._browser && gWindows[i]._browser.contentWindow == w)
+    if ("_browser" in gWindows[i])
       return true;
   }
   return false;
-}
-
-const kDefaultNs = "_";
-
-function attachPropertyToWindow(sandbox, propName) {
-  console.log("EVALLING: window." + propName + " = " + propName + ";");
-  Cu.evalInSandbox("window." + propName + " = " + propName + ";", sandbox);
-}
-
-function injectProperties(sandbox, props, ns = kDefaultNs) {
-  let type = typeof props;
-  if (type == "object") {
-    if (ns != kDefaultNs) {
-      sandbox[ns] = props;
-      attachPropertyToWindow(sandbox, ns);
-    }
-    for (let propName in props) {
-      injectProperties(sandbox, props[propName],
-                       (ns == kDefaultNs ? "" : ns + ".") + propName);
-    }
-  } else {
-    sandbox[ns] = props;
-    if (ns != kDefaultNs)
-      attachPropertyToWindow(sandbox, ns);
-  }
 }
 
 let checkWindows = function(subject, url) {
@@ -81,26 +57,31 @@ let checkWindows = function(subject, url) {
       let wo = gWindows[i];
       // "requiring" the prevent navigation module will install a content policy
       // that disallows changing the root HTML page.
-      require("sdk/prevent-navigation");
+      // require("sdk/prevent-navigation");
 
-      if (wo.options.injectProps) {
-        // let window = subject.wrappedJSObject;
-        // for (let propName in wo.options.injectProps) {
-        //   window[propName] = wo.options.injectProps[propName];
-        // }
-        let sandbox = Cu.Sandbox(
-          Cc["@mozilla.org/systemprincipal;1"].createInstance(Ci.nsIPrincipal),
-          {wantXrays: false, sameGroupAs: global}
-        );
+      // let sandbox = new Cu.Sandbox(
+      //   Cc["@mozilla.org/systemprincipal;1"]
+      //     .createInstance(Ci.nsIPrincipal)
+      // );
 
-        sandbox.window = subject.wrappedJSObject;
-        //injectProperties(global, wo.options.injectProps);
-        for (var k in wo.options.injectProps) {
-          sandbox[k] = wo.options.injectProps[k];
+      // sandbox.window = subject.wrappedJSObject;
 
-          Cu.evalInSandbox("window."+k+" = "+k+";", sandbox);
-        }
-      }
+      // for (var k in wo.options.injectProps) {
+      //   sandbox[k] = wo.options.injectProps[k];
+
+      //   Cu.evalInSandbox("window."+k+" = "+k+";", sandbox);
+      // }
+
+      // if (wo.options.injectProps) {
+      //   let window = subject.wrappedJSObject;
+      //   let scope = wo.options.injectProps;
+      //   // let scope = Cu.createObjectIn(window);
+      //   // Object.defineProperties(scope, wo.options.injectProps);
+      //   // Cu.makeObjectPropsNormal(scope);
+
+      //   for (var k in wo.options.injectProps)
+      //     window[k] = scope[k];
+      // }
     }
   }
 };
@@ -110,7 +91,7 @@ Observers.add("chrome-document-global-created", checkWindows);
 
 // Forward in-browser console API calls to ours.
 Observers.add("console-api-log-event", function(data) {
-  console.dir(data.wrappedJSObject);
+  //console.dir(data.wrappedJSObject);
   console.fromEvent(data.wrappedJSObject);
 });
 
@@ -164,7 +145,8 @@ Window.prototype = {
           let browser = this._window.document.createElement("browser");
           browser.setAttribute("id", "main-window");
           browser.setAttribute("disablehistory", "indeed");
-          browser.setAttribute("type", "content-primary");
+          // browser.setAttribute("type", "content-primary");
+          browser.setAttribute("type", "chrome");
           browser.setAttribute("style", "background:none;background-color:transparent !important");
           browser.setAttribute("flex", "1");
           browser.setAttribute("height", "100%");
@@ -172,18 +154,29 @@ Window.prototype = {
           event.target.documentElement.appendChild(browser);
 
           this._browser = browser;
-          browser.loadURI(this.options.url);
-          if (this._testCallbacks != undefined && this._testCallbacks.onload != undefined) {
-             let refthis = this;
-             browser.addEventListener("DOMContentLoaded", function() { 
-               refthis._testCallbacks.onload();
-             }, false);
-          }
+
           let parentWindow = this._window;
-          browser.addEventListener("DOMTitleChanged", function(evt){
+          browser.addEventListener("DOMTitleChanged", evt => {
+            require("sdk/prevent-navigation");
+
+            let window = browser.contentWindow.wrappedJSObject;
+            if (this.options.injectProps) {
+              for (let propName in this.options.injectProps)
+                window[propName] = this.options.injectProps[propName];
+            }
+
             if (evt.target.title.trim().length > 0)
               parentWindow.document.title = evt.target.title;
           }, false);
+
+          // Legacy support for tests.
+          if (this._testCallbacks && typeof this._testCallbacks.onload == "function") {
+            browser.addEventListener("DOMContentLoaded", () => {
+              this._testCallbacks.onload();
+            }, false);
+          }
+
+          browser.loadURI(this.options.url);
         }
         return false;
     }
@@ -192,8 +185,6 @@ Window.prototype = {
     this._window.close();
   }
 };
-
-// require("deprecated/errors").catchAndLogProps(Window.prototype, "handleEvent");
 
 exports.Window = Window;
 
