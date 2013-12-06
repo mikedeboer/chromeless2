@@ -52,7 +52,7 @@ let myURI = Components.stack.filename.split(" -> ").slice(-1)[0];
 
 if (global.require) {
   // We're being loaded in a SecurableModule.
-  securableModule = require("sdk/securable-module");
+  securableModule = require("deprecated/securable-module");
 } else {
   let ios = Cc["@mozilla.org/network/io-service;1"]
               .getService(Ci.nsIIOService);

@@ -13,12 +13,8 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Initial Developer of the Original Code is
- * Mike de Boer, Ajax.org.
- * Portions created by the Initial Developer are Copyright (C) 2010
- * the Initial Developer. All Rights Reserved.
- *
  * Contributor(s):
+ *   Mike de Boer <mdeboer@mozilla.com> (Original Author)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,10 +30,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const {Cc, Ci} = require("chrome"),
-      timers = require("timers"),
-      notifications = require("sdk/notifications"),
-      windows = require("sdk/chromeless-sandbox-window");
+const {Cc, Ci} = require("chrome");
+const timers = require("sdk/timers");
+const notifications = require("notifications");
+const windows = require("sandbox-window");
 
 /**
  * Return the current window. This function does not exist outside of the context of a window.

@@ -8,18 +8,18 @@
   },
   "loader": "resource://[%uuid%]-addon-sdk/loader.js",
   "paths": {
-    "": "resource://[%uuid%]-addon-sdk/",
-    "sdk/": "resource://[%uuid%]-sdk/"
+    "sdk/": "resource://[%uuid%]-addon-sdk/",
+    "": "resource://[%uuid%]-sdk/"
   },
   "resources": {
     "[%uuid%]-addon-sdk": ["modules", "[%uuid%]-addon-sdk"],
     "[%uuid%]-sdk": ["modules", "[%uuid%]-sdk"]
   },
-  "mainModule": "sdk/main",
+  "mainModule": "main",
   "staticArgs": {
     "browser": "app_code/index.html"
   },
   "mappings": {
-    "path": "fs/path"
+    "path": "sdk/fs/path"
   }
 }

@@ -211,8 +211,8 @@ function validate(manf) {
  * This module give you conveinent read access to this file
  */
 
-const appPaths = require('sdk/app-paths');
-const file = require('sdk/file');
+const appPaths = require('app-paths');
+const file = require('file');
 const path = require('path');
 
 var appInfoContents = undefined;

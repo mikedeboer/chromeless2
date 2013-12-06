@@ -19,7 +19,7 @@ console.log("+");
    timer.setTimeout( function () { tick() }, 1000);
 } 
 
-require("unload").when(
+require("sdk/system/unload").when(
   function() {
     trackedObjects = {};
     if (timer) {

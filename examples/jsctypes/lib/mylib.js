@@ -9,7 +9,7 @@ Cu.import("resource://gre/modules/ctypes.jsm", ctypes);
 ctypes = ctypes.ctypes;
 
 exports.getString = function() {
-    var curPath = require("url").toFilename(__url__);
+    var curPath = require("sdk/url").toFilename(__url__);
     var pathToLib = undefined;
     [ "libmylib.so", "libmylib.dylib", "mylib.dll" ].forEach(function(x) {
         var candidate = path.join(path.dirname(curPath), x);

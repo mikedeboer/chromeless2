@@ -43,7 +43,7 @@
 
 const {Ci, Cc, Cr, Cu} = require("chrome");
 const path = require("path");
-const appinfo = require("sdk/appinfo");
+const appinfo = require("appinfo");
 
 let appWindow = null;
 
@@ -130,7 +130,7 @@ exports.main = function main(options, testCallbacks) {
   const ai = appinfo.contents;
 
   let call = options.staticArgs;
-  const contentWindow = require("sdk/chromeless-sandbox-window");
+  const contentWindow = require("sandbox-window");
 
   let file = path.basename(call.browser);
 
@@ -139,8 +139,8 @@ exports.main = function main(options, testCallbacks) {
   let rootPath, startPage;
   if (systemMode) {
     rootPath = path.join(call.appBasePath, path.dirname(call.browser));
-    startPage = require("url").fromFilename(call.appBasePath);
-    let protocol = require("sdk/custom-protocol").register("chromeless");
+    startPage = require("sdk/url").fromFilename(call.appBasePath);
+    let protocol = require("custom-protocol").register("chromeless");
     protocol.setHost("main", startPage , "system");
     startPage = "chromeless://main/" + call.browser;
   } else {

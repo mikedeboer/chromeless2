@@ -34,8 +34,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-let {Cc, Ci, Cm, Cr, Cu} = require("chrome");
-let Uuid = require("util/uuid").uuid;
+const {Cc, Ci, Cm, Cr, Cu} = require("chrome");
+const Uuid = require("sdk/util/uuid").uuid;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -138,9 +138,9 @@ let Protocol = exports.Protocol = function Protocol(name) {
     this.contractID = contractID;
 
     componentManager.registerFactory(this.uuid,
-                       this.name,
-                       this.contractID,
-                       this);
+                                     this.name,
+                                     this.contractID,
+                                     this);
 
     Factories.push(this);
   }
@@ -177,7 +177,7 @@ exports.register = function register(name) {
   return new Protocol(name);
 };
 
-require("system/unload").when(() => {
+require("sdk/system/unload").when(() => {
   for (let factory of Factories)
     factory.unregister();
 })

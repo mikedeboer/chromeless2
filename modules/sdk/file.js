@@ -44,9 +44,9 @@
  */
 
 const {Cc,Ci,Cr} = require("chrome");
-const byteStreams = require("io/byte-streams");
-const textStreams = require("io/text-streams");
-const xpcom = require("platform/xpcom");
+const byteStreams = require("sdk/io/byte-streams");
+const textStreams = require("sdk/io/text-streams");
+const xpcom = require("sdk/platform/xpcom");
 
 // Flags passed when opening a file.  See nsprpub/pr/include/prio.h.
 const OPEN_FLAGS = {
@@ -273,6 +273,6 @@ function FileWrapper(obj) {
  *  @param {string} path The path from which to construct a File object.
  *  @returns {File} an object representation of a file
  */
-exports.File = require("sdk/api-utils").publicConstructor(FileWrapper);
+exports.File = require("api-utils").publicConstructor(FileWrapper);
 
 /** @endclass */

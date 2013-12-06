@@ -1,6 +1,6 @@
 
 const m = require("main");
-const timer = require("timer");
+const timer = require("sdk/timers");
 
 exports.testBrowser = function (test) {
 

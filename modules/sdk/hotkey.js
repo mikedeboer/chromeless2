@@ -34,8 +34,8 @@
  * Add shortcut key combinations or "hotkeys" to your application.
  */
 
-const ui = require("sdk/ui");
-const Uuid = require("util/uuid").uuid;
+const ui = require("ui");
+const Uuid = require("sdk/util/uuid").uuid;
 
 const modifiers = {"shift": 1, "alt": 1, "meta": 1, "control": 1, "accel": 1, "access": 1, "any": 1};
 let keySet;

@@ -38,7 +38,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 const { Cc, Ci, Cr } = require("chrome");
-const apiUtils = require("sdk/api-utils");
+const apiUtils = require("api-utils");
 
 try {
   let alertServ = Cc["@mozilla.org/alerts-service;1"].

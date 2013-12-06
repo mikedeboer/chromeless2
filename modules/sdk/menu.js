@@ -31,9 +31,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 const {Cc, Ci, Cr} = require("chrome");
-const utils   = require("sdk/api-utils");
-const hotkeys = require("sdk/hotkey");
-const ui      = require("sdk/ui");
+const utils   = require("api-utils");
+const hotkeys = require("hotkey");
+const ui      = require("ui");
 const _slice  = Array.prototype.slice;
 const kNsXul  = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 

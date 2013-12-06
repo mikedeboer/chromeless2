@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 const {Cc, Ci, Cr, Cu} = require("chrome");
-const Events = require("event/core");
+const Events = require("sdk/event/core");
 
 /**
  * @class ProgressMonitor

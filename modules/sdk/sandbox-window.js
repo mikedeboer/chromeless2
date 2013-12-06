@@ -5,13 +5,13 @@ let gWindows = [];
 
 const ww = Cc["@mozilla.org/embedcomp/window-watcher;1"]
              .getService(Ci.nsIWindowWatcher);
-Cu.import("resource://sdk/console.js");
+Cu.import("resource://app-bootstrap/console.js");
 
-const Observers = require("deprecated/observer-service");
+const Observers = require("sdk/deprecated/observer-service");
 
 const kNsXul = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 const kNsXhtml = "http://www.w3.org/1999/xhtml";
-const kAppInfo = require("sdk/appinfo").contents;
+const kAppInfo = require("appinfo").contents;
 
 const kMenubar = (typeof kAppInfo.menubar == "undefined" || kAppInfo.menubar) ?
   '<toolbox id="theTopToolbox" style="padding: 0; border: 0; margin: 0;">' +
@@ -57,7 +57,7 @@ let checkWindows = function(subject, url) {
       let wo = gWindows[i];
       // "requiring" the prevent navigation module will install a content policy
       // that disallows changing the root HTML page.
-      require("sdk/prevent-navigation");
+      require("prevent-navigation");
 
       let sandbox = new Cu.Sandbox(
         Cc["@mozilla.org/systemprincipal;1"]
@@ -167,7 +167,7 @@ Window.prototype = {
 
 exports.Window = Window;
 
-require("system/unload").when(function() {
+require("sdk/system/unload").when(function() {
   gWindows.slice().forEach(window => window.close());
 });
 
