@@ -33,7 +33,6 @@
         </style>
         <script type="text/javascript" src="async.js"></script>
         <script type="text/javascript">
-            console.error("Components?? " + typeof Components);
             var ui = require("sdk/ui");
             var menu = require("sdk/menu");
             
@@ -117,10 +116,7 @@
                 ]
             });
 
-            console.log(ui.getMenu().outerHTML);
-
-            function addMenu() {
-                console.log("VIEW:: " + Object.keys(view));
+            function updateMenu() {
                 view.children.splice(0, 1);
                 view.children.splice(-1, 0, menu.Menu({ label: "About..." }));
                 view.children.sort(function(a, b) {
@@ -149,7 +145,7 @@
                 <button onclick="beep()">Sound a BEEP</button>
                 <button onclick="playSound()">Play an MP3</button>
                 <button onclick="addTray()">Update tray/ dock icon</button>
-                <button onclick="addMenu()">Update the application menu</button>
+                <button onclick="updateMenu()">Update the application menu</button>
             </div>
         </div>
     </body>

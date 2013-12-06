@@ -45,20 +45,6 @@ const {Ci, Cc, Cr, Cu} = require("chrome");
 const path = require("path");
 const appinfo = require("sdk/appinfo");
 
-function genPropDesc(value) {
-  return {
-    enumerable: true, configurable: true, writable: true, value: value
-  };
-}
-
-function descriptor(object) {
-  let value = {};
-  Object.getOwnPropertyNames(object).forEach(function(name) {
-    value[name] = Object.getOwnPropertyDescriptor(object, name)
-  });
-  return value;
-}
-
 let appWindow = null;
 
 // These functions are used from the test application.
@@ -131,11 +117,6 @@ function requireForBrowser(moduleName, context = this) {
   console.log("browser HTML requires: " + moduleName);
   try {
     return require(moduleName);
-    // let exports = require(moduleName);
-    // let scopedExports = Cu.createObjectIn(context);
-    // Object.defineProperties(scopedExports, descriptor(exports));
-    // Cu.makeObjectPropsNormal(scopedExports);
-    // return scopedExports;
   } catch(ex) {
     console.log("require of '" + moduleName + "' failed: " + ex.message);
     console.log(ex.stack);
@@ -194,9 +175,9 @@ exports.main = function main(options, testCallbacks) {
   // enable debugging by default
   enableDebuggingOutputToConsole();
 
-  /* Page window height and width is fixed, it won't be and it also
-     should be smart, so HTML browser developer can change it when
-     they set inner document width and height */
+  // Page window height and width is fixed, it won't be and it also should be
+  // smart, so HTML browser developer can change it when they set inner document
+  // width and height.
   appWindow = new contentWindow.Window({
     url: startPage,
     width: 800,
@@ -211,13 +192,6 @@ exports.main = function main(options, testCallbacks) {
         // This is for tests framework to test the window exists or not:
         appWindow = null;
       }
-      // require: genPropDesc(requireForBrowser),
-      // exit: genPropDesc(function() {
-      //   console.log("window.exit() called...");
-      //   appWindow.close();
-      //   // This is for tests framework to test the window exists or not:
-      //   appWindow = null;
-      // })
     }
   }, testCallbacks);
 };

@@ -13,12 +13,8 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Initial Developer of the Original Code is
- * Mike de Boer, Ajax.org.
- * Portions created by the Initial Developer are Copyright (C) 2010
- * the Initial Developer. All Rights Reserved.
- *
  * Contributor(s):
+ *   Mike de Boer <mdeboer@mozilla.com> (Original author)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -39,10 +35,11 @@
  */
 
 const ui = require("sdk/ui");
+const Uuid = require("util/uuid").uuid;
 
 const modifiers = {"shift": 1, "alt": 1, "meta": 1, "control": 1, "accel": 1, "access": 1, "any": 1};
-var keySet,
-    bindings = {};
+let keySet;
+let bindings = {};
 
 /*
  * Trim and split string [s] with separator [separator] with additional options, 
@@ -56,9 +53,9 @@ var keySet,
  * @type  {Array}
  */
 function splitSafe(s, separator, limit, bLowerCase) {
-    return (bLowerCase && (s = s.toLowerCase()) || s)
-        .replace(/(?:^\s+|\n|\s+$)/g, "")
-        .split(new RegExp("[\\s ]*" + separator + "[\\s ]*", "g"), limit || 999);
+  return (bLowerCase && (s = s.toLowerCase()) || s)
+    .replace(/(?:^\s+|\n|\s+$)/g, "")
+    .split(new RegExp("[\\s ]*" + separator + "[\\s ]*", "g"), limit || 999);
 }
 
 /*
@@ -70,13 +67,13 @@ function splitSafe(s, separator, limit, bLowerCase) {
  * @type {XULElement}
  */
 function getKeyset() {
-    if (keySet)
-        return keySet;
-    let doc  = ui.getMainWindow().document,
-        sets = doc.getElementsByTagName("keyset");
-    if (sets.length)
-        return (keySet = sets[0]);
-    return (keySet = doc.getElementsByTagName("window")[0].appendChild(doc.createElement("keyset")));
+  if (keySet)
+    return keySet;
+  let doc  = ui.getMainWindow().document;
+  let sets = doc.getElementsByTagName("keyset");
+  if (sets.length)
+    return (keySet = sets[0]);
+  return (keySet = doc.getElementsByTagName("window")[0].appendChild(doc.createElement("keyset")));
 }
 
 /*
@@ -89,15 +86,16 @@ function getKeyset() {
  * @type {Object}
  */
 function parseHotkey(hotkey) {
-    let key,
-        keys = splitSafe(hotkey, "\\-", null, true),
-        mods = [];
-    for (let i = 0, l = keys.length; i < l; ++i) {
-        key = keys[i];
-        if (modifiers[key])
-            mods.push(key), key = null;
+  let key;
+  let keys = splitSafe(hotkey, "\\-", null, true);
+  let mods = [];
+  for (key of keys) {
+    if (modifiers[key]) {
+      mods.push(key);
+      key = null;
     }
-    return {key: key, modifiers: mods};
+  }
+  return {key: key, modifiers: mods};
 }
 
 /*
@@ -111,24 +109,23 @@ function parseHotkey(hotkey) {
  * @type  {XULElement}
  */
 function getBinding(hotkey, command) {
-    let bind,
-        {key, modifiers} = parseHotkey(hotkey),
-        mods = modifiers.join(" ");
+  let bind;
+  let {key, modifiers} = parseHotkey(hotkey);
+  let mods = modifiers.join(" ");
 
-    for (let i in bindings) {
-        if (!bindings.hasOwnProperty(i))
-            continue;
-        bind = bindings[i];
-        if (bind.getAttribute("key") !== key && bind.getAttribute("modifiers") !== mods)
-            return;
-        if (typeof command == "string") {
-            if (bind.getAttribute("command") === command)
-                return bind;
-        }
-        else if (bind._command === command) {
-            return bind;
-        }
+  for (let i in bindings) {
+    if (!bindings.hasOwnProperty(i))
+      continue;
+    bind = bindings[i];
+    if (bind.getAttribute("key") !== key && bind.getAttribute("modifiers") !== mods)
+      return;
+    if (typeof command == "string") {
+      if (bind.getAttribute("command") === command)
+        return bind;
+    } else if (bind._command === command) {
+      return bind;
     }
+  }
 }
 
 /**
@@ -164,29 +161,28 @@ function getBinding(hotkey, command) {
  * @returns  {string} Return the ID of the hotkey.
  */
 exports.register = function(hotkey, command, id) {
-    let {key, modifiers} = parseHotkey(hotkey);
-    if (!key)
-        throw "Please provide a valid key for a keybinding to work!";
-    if (!modifiers.length)
-        throw "Please provide at least one modifier key for a keybinding to work!";
-    // do it naively for now, without checking IF the hotkey is already registered, 
-    // but to another command.
-    let doc  = ui.getMainWindow().document,
-        node = getKeyset().appendChild(doc.createElement("key"));
-    if (!id)
-        id = ui.getUUID();
-    bindings[id] = node;
-    node.setAttribute("id", id);
-    node.setAttribute("modifiers", modifiers.join(" "));
-    node.setAttribute("key", key);
-    if (typeof command == "string") {
-        node.setAttribute("command", command);
-    }
-    else {
-        node.setAttribute("oncommand", "this._command()");
-        node._command = command;
-    }
-    return id;
+  let {key, modifiers} = parseHotkey(hotkey);
+  if (!key)
+    throw "Please provide a valid key for a keybinding to work!";
+  if (!modifiers.length)
+    throw "Please provide at least one modifier key for a keybinding to work!";
+  // do it naively for now, without checking IF the hotkey is already registered, 
+  // but to another command.
+  let doc  = ui.getMainWindow().document;
+  let node = getKeyset().appendChild(doc.createElement("key"));
+  if (!id)
+    id = Uuid();
+  bindings[id] = node;
+  node.setAttribute("id", id);
+  node.setAttribute("modifiers", modifiers.join(" "));
+  node.setAttribute("key", key);
+  if (typeof command == "string") {
+    node.setAttribute("command", command);
+  } else {
+      node.setAttribute("oncommand", "this._command()");
+      node._command = command;
+  }
+  return id;
 };
 
 /**
@@ -199,13 +195,13 @@ exports.register = function(hotkey, command, id) {
  * @type  {void}
  */
 exports.unregister = function(hotkey, command, id) {
-    if (id) {
-        if (!bindings[id])
-            throw "There is no hotkey registered with id '" + id + "'";
-        bindings[id].parentNode.removeChild(bindings[id]);
-    }
-    let bind = getBinding(hotkey, command);
-    if (!bind)
-        throw "Hotkey '" + hotkey + "' is not registered yet";
-    bind.parentNode.removeChild(bind);
+  if (id) {
+    if (!bindings[id])
+      throw "There is no hotkey registered with id '" + id + "'";
+    bindings[id].parentNode.removeChild(bindings[id]);
+  }
+  let bind = getBinding(hotkey, command);
+  if (!bind)
+    throw "Hotkey '" + hotkey + "' is not registered yet";
+  bind.parentNode.removeChild(bind);
 };

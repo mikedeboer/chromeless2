@@ -57,31 +57,20 @@ let checkWindows = function(subject, url) {
       let wo = gWindows[i];
       // "requiring" the prevent navigation module will install a content policy
       // that disallows changing the root HTML page.
-      // require("sdk/prevent-navigation");
+      require("sdk/prevent-navigation");
 
-      // let sandbox = new Cu.Sandbox(
-      //   Cc["@mozilla.org/systemprincipal;1"]
-      //     .createInstance(Ci.nsIPrincipal)
-      // );
+      let sandbox = new Cu.Sandbox(
+        Cc["@mozilla.org/systemprincipal;1"]
+          .createInstance(Ci.nsIPrincipal)
+      );
 
-      // sandbox.window = subject.wrappedJSObject;
+      sandbox.window = subject.wrappedJSObject;
 
-      // for (var k in wo.options.injectProps) {
-      //   sandbox[k] = wo.options.injectProps[k];
+      for (var k in wo.options.injectProps) {
+        sandbox[k] = wo.options.injectProps[k];
 
-      //   Cu.evalInSandbox("window."+k+" = "+k+";", sandbox);
-      // }
-
-      // if (wo.options.injectProps) {
-      //   let window = subject.wrappedJSObject;
-      //   let scope = wo.options.injectProps;
-      //   // let scope = Cu.createObjectIn(window);
-      //   // Object.defineProperties(scope, wo.options.injectProps);
-      //   // Cu.makeObjectPropsNormal(scope);
-
-      //   for (var k in wo.options.injectProps)
-      //     window[k] = scope[k];
-      // }
+        Cu.evalInSandbox("window."+k+" = "+k+";", sandbox);
+      }
     }
   }
 };
@@ -107,10 +96,9 @@ function Window(options, testCallbacks) {
   features.push("resizable=" + trueIsYes(options.resizable));
   features.push("menubar=" + trueIsYes(options.menubar));
 
-  /* We now pass the options.url, which is the user app directly
-  inserting it in the window, instead using the xul browser element
-  that was here. This helped to make the session history work.
-  */
+  // We now pass the options.url, which is the user app directly inserting it in
+  // the window, instead using the xul browser element that was here. This
+  // helped to make the session history work.
   let url = "data:application/vnd.mozilla.xul+xml," + escape(kBlankXul);
   let window = ww.openWindow(null, url, null, features.join(","), null);
 
@@ -145,8 +133,7 @@ Window.prototype = {
           let browser = this._window.document.createElement("browser");
           browser.setAttribute("id", "main-window");
           browser.setAttribute("disablehistory", "indeed");
-          // browser.setAttribute("type", "content-primary");
-          browser.setAttribute("type", "chrome");
+          browser.setAttribute("type", "content-primary");
           browser.setAttribute("style", "background:none;background-color:transparent !important");
           browser.setAttribute("flex", "1");
           browser.setAttribute("height", "100%");
@@ -157,14 +144,6 @@ Window.prototype = {
 
           let parentWindow = this._window;
           browser.addEventListener("DOMTitleChanged", evt => {
-            require("sdk/prevent-navigation");
-
-            let window = browser.contentWindow.wrappedJSObject;
-            if (this.options.injectProps) {
-              for (let propName in this.options.injectProps)
-                window[propName] = this.options.injectProps[propName];
-            }
-
             if (evt.target.title.trim().length > 0)
               parentWindow.document.title = evt.target.title;
           }, false);

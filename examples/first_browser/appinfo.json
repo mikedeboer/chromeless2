@@ -5,5 +5,6 @@
   "shortname": "my_first_browser",
   "developer_email": "unknown@unknown.com", 
   "module_dirs": [], 
-  "version": "0.1"
+  "version": "0.1",
+  "enableSystemPrivileges": true
 }
