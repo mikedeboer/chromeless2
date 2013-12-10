@@ -79,7 +79,7 @@ if (argc > 1 && Build.executionModes[argv[1]]) {
 
 if (!appToLaunch) {
   appToLaunch = Util.findBrowserHTML(Path.join(cwd, "examples",
-    "first_browser", "index.html"));
+    "api-demo", "index.html"));
 }
 
 // Throw an error message if we can't figure out what html file is the browser's

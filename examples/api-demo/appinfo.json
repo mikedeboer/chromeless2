@@ -1,8 +1,8 @@
 {
   "build_id": "20131009161040",
   "vendor": "Unknown",
-  "name": "Chromeless UI",
-  "shortname": "ui",
+  "name": "Chromeless API Demo",
+  "shortname": "api-demo",
   "developer_email": "unknown@unknown.com",
   "module_dirs": [],
   "version": "0.1",
