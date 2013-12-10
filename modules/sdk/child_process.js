@@ -268,5 +268,5 @@ exports.ChildProcess = ChildProcess;
 
 require("sdk/system/unload").when(function unload() {
   for (let process of processes)
-    process.kill()
+    process.kill();
 });
