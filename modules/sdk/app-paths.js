@@ -47,7 +47,7 @@ const Path = require("path");
 const dirsvc = Cc["@mozilla.org/file/directory_service;1"]
                  .getService(Ci.nsIProperties);
 
-let dirCache = new WeakMap();
+let dirCache = new Map();
 let getAndCachePath = function(key) {
   if (dirCache.has(key))
     return dirCache.get(key);
@@ -71,8 +71,7 @@ module.exports = Object.freeze({
    * @type string
    */
   get profileDir() {
-    const key = "ProfD";
-    return getAndCachePath(key);
+    return getAndCachePath("ProfD");
   },
 
   /**
@@ -93,8 +92,7 @@ module.exports = Object.freeze({
    */
   get startMenuDir() {
     // Will return NULL if we're not on windows (no start menu dir).
-    const key = "Progs";
-    return getAndCachePath(key);
+    return getAndCachePath("Progs");
   },
 
   /**
@@ -102,8 +100,7 @@ module.exports = Object.freeze({
    * @type string
    */
   get desktopDir() {
-    const key = "Desk";
-    return getAndCachePath(key);
+    return getAndCachePath("Desk");
   },
 
   /**
@@ -111,8 +108,7 @@ module.exports = Object.freeze({
    * @type string
    */
   get userHomeDir() {
-    const key = "Home";
-    return getAndCachePath(key);
+    return getAndCachePath("Home");
   },
 
   /**
@@ -124,8 +120,7 @@ module.exports = Object.freeze({
    * @type string
    */
   get profileRootDir() {
-    const key = "DefProfRt";
-    return getAndCachePath(key);
+    return getAndCachePath("DefProfRt");
   },
 
   /**
@@ -134,8 +129,7 @@ module.exports = Object.freeze({
    * @type string
    */
   get pluginsDir() {
-    const key = "APlugns";
-    return getAndCachePath(key);
+    return getAndCachePath("APlugns");
   },
 
   /**
@@ -143,8 +137,7 @@ module.exports = Object.freeze({
    * @type string
    */
   get curDir() {
-    const key = "CurProcD";
-    return getAndCachePath(key);
+    return getAndCachePath("CurProcD");
   },
 
   /**
@@ -152,8 +145,7 @@ module.exports = Object.freeze({
    * @type string
    */
   get tmpDir() {
-    const key = "TmpD";
-    return getAndCachePath(key);
+    return getAndCachePath("TmpD");
   },
 
   get resourcePaths() {
@@ -164,3 +156,5 @@ module.exports = Object.freeze({
     resPaths = [].concat(val);
   }
 });
+
+require("sdk/system/unload").when(() => dirCache.clear());

@@ -46,10 +46,8 @@
  * of milliseconds after page load (i.e. with `setTimeout()`)
  */
 
-const windowUtils = require('window-utils');
-
 function supplyDefault(window) {
-  return (window === undefined) ? windowUtils.activeWindow : window;
+  return (window === undefined) ? require("main").AppWindow._window : window;
 }
 
 
@@ -59,8 +57,8 @@ function supplyDefault(window) {
  * current active window.
  */
 exports.enable = function(window) {
-    window = supplyDefault(window);
-    window.fullScreen=true;
+  window = supplyDefault(window);
+  window.fullScreen = true;
 };
 
 /**
@@ -70,7 +68,7 @@ exports.enable = function(window) {
  */
 exports.disable = function(window) {
     window = supplyDefault(window);
-    window.fullScreen=false;
+    window.fullScreen = false;
 };
 
 /**
@@ -80,5 +78,5 @@ exports.disable = function(window) {
  */
 exports.toggle = function(window) {
     window = supplyDefault(window);
-    window.fullScreen=!window.fullScreen;
+    window.fullScreen =! window.fullScreen;
 };

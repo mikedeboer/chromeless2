@@ -179,8 +179,8 @@ exports.register = function(hotkey, command, id) {
   if (typeof command == "string") {
     node.setAttribute("command", command);
   } else {
-      node.setAttribute("oncommand", "this._command()");
-      node._command = command;
+    node.setAttribute("oncommand", "this._command()");
+    node._command = command;
   }
   return id;
 };

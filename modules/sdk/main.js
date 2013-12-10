@@ -45,24 +45,20 @@ const {Ci, Cc, Cr, Cu} = require("chrome");
 const path = require("path");
 const appinfo = require("appinfo");
 const AppPaths = require("app-paths");
+const Process = require("process");
 
 let appWindow = null;
 
 // These functions are used from the test application.
-/*
-exports.getAppWindow = function () {
-  return appWindow;
-}
-*/
-exports = module.exports = {
-  get getAppWindow() {
+module.exports = exports = {
+  get AppWindow() {
     return appWindow;
-  }
+  },
+  get AppBrowser() {
+    return appWindow._browser;
+  },
+  StartTime: Date.now()
 };
-
-exports.getAppBrowser = function () {
-  return appWindow._browser;
-}
 
 function enableDebuggingOutputToConsole() {
   let jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"]
@@ -188,6 +184,7 @@ exports.main = function main(options, testCallbacks) {
     resizable: ai.resizable ? true : false,
     menubar: ai.menubar ? true : false,
     injectProps : {
+      process: Process,
       require: requireForBrowser,
       exit: function() {
         console.log("window.exit() called...");

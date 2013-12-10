@@ -32,9 +32,10 @@
 
 "use strict";
 
-const {Cu} = require("chrome");
+const {Ci, Cu} = require("chrome");
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Services.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "GetArgv", "resource://app-bootstrap/cli.js");
 
@@ -76,8 +77,21 @@ XPCOMUtils.defineLazyModuleGetter(this, "GetArgv", "resource://app-bootstrap/cli
  * process.uptime()
  * process.hrtime()
  */
+const platformMappings = {
+  "winnt": "win32"
+};
 
-exports.platform = Object.freeze({
+const archMappings = {
+  "x86": "ai32",
+  "x86_64": "x64",
+  "ia64": "x64"
+}
+
+const notImplementedYet = function() {
+  throw new Error("Not implemented yet!");
+};
+
+module.exports = Object.freeze({
   get argv() {
     let ret;
     GetArgv(argv => ret = argv);
@@ -85,62 +99,88 @@ exports.platform = Object.freeze({
   },
 
   get execPath() {
-    //
+    notImplementedYet();
   },
 
   get execArgv() {
-    //
+    notImplementedYet();
   },
 
-  cwd: function() {},
+  cwd: function() {
+    return require("app-paths").curDir;
+  },
 
   get env() {
-    //
+    notImplementedYet();
   },
 
-  exit: function(code = 0) {},
+  exit: function(code = 0) {
+    require("main").AppWindow.close();
+  },
 
-  getgid: function() {},
+  getgid: notImplementedYet,
 
-  setgid: function(id) {},
+  setgid: notImplementedYet,
 
-  getuid: function() {},
+  getuid: notImplementedYet,
 
-  setuid: function(id) {},
+  setuid: notImplementedYet,
 
-  getgroups: function() {},
+  getgroups: notImplementedYet,
 
-  setgroups: function(groups) {},
+  setgroups: notImplementedYet,
 
-  initgroups: function(user, extra_group) {},
+  initgroups: notImplementedYet,
 
   get version() {
-    //
+    return require("appinfo").contents.version;
   },
 
   get versions() {
-    //
+    notImplementedYet();
   },
 
   get config() {
-    //
+    notImplementedYet();
   },
 
-  get pid() {},
+  get pid() {
+    notImplementedYet();
+  },
 
-  get title() {},
+  get title() {
+    notImplementedYet();
+  },
 
-  get platform() {},
+  get arch() {
+    let abi = Services.appinfo.XPCOMABI.split("-")[0].toLowerCase();
+    return archMappings[abi] || abi;
+  },
 
-  memoryUsage: function() {},
+  get platform() {
+    let platform = Services.appinfo.OS.toLowerCase();
+    return platformMappings[platform] || platform;
+  },
 
-  nextTick: function(callback),
+  memoryUsage: notImplementedYet,
 
-  get maxTickDepth() {},
+  nextTick: function(callback) {
+    if (!callback)
+      return;
+    Services.tm.mainThread.dispatch(callback, Ci.nsIThread.DISPATCH_NORMAL);
+  },
 
-  umask: function(mask) {},
+  get maxTickDepth() {
+    return Infinity;
+  },
 
-  uptime: function() {},
+  umask: notImplementedYet,
 
-  hrtime: function() {}
+  uptime: function() {
+    return Math.floor((Date.now() - require("main").StartTime) / 1000);
+  },
+
+  hrtime: function() {
+    return require("main").AppWindow._window.performance.now();
+  }
 });
