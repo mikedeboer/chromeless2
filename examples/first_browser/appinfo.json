@@ -1,10 +1,9 @@
 {
-  "build_id": "20131009151406", 
-  "vendor": "Unknown", 
-  "name": "My First Browser", 
-  "shortname": "my_first_browser",
-  "developer_email": "unknown@unknown.com", 
-  "module_dirs": [], 
+  "build_id": "20131009151406",
+  "vendor": "Unknown",
+  "name": "My First Browser",
+  "developer_email": "unknown@unknown.com",
+  "module_dirs": [],
   "version": "0.1",
   "enableSystemPrivileges": true
 }
