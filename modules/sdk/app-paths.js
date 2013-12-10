@@ -11,15 +11,14 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is chromless.
- *
- * The Initial Developer of the Original Code is
- *   Lloyd Hilaiel <lloyd@mozilla.com>.
+ * The Original Code is chromeless.
  *
  * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *   Lloyd Hilaiel <lloyd@mozilla.com> (Original Author)
+ *   Mike de Boer <mdeboer@mozilla.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,85 +34,133 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+"use strict";
+
 /**
  * Returns various paths that are pertinent to the currently running
  * application and logged in user.
  */
 
-const {Cc,Ci,Cr} = require("chrome");
-const path = require('path');
+const {Cc, Ci, Cr} = require("chrome");
+const Path = require("path");
 
-var dirsvc = Cc["@mozilla.org/file/directory_service;1"]
-             .getService(Ci.nsIProperties);
+const dirsvc = Cc["@mozilla.org/file/directory_service;1"]
+                 .getService(Ci.nsIProperties);
 
-/**
- * The currently active *profile*, which is a user specific directory where
- * user scoped application data may reside, such as preferences and history.
- *
- * @type string
- */
-exports.profileDir = dirsvc.get("ProfD", Ci.nsIFile).path;
-
-/**
- * The path where the *browser code* of the application resides on disk.
- * For an installed application this usually be nested inside of a system wide installation path.
- * This path should be expected to be read-only.
- * @type string
- */
-exports.browserCodeDir = path.join(dirsvc.get("DefRt", Ci.nsIFile).parent.path, "app_code");
-
-/**
- * @property startMenuDir
- * On windows, the path to the start menu where shortcuts may be installed.
- * `null` on other platforms.
- * @type string
- */
-try {
-    // will fail if we're not on windows (no start menu dir)
-    exports.startMenuDir = dirsvc.get("Progs", Ci.nsIFile).path;
-} catch(e) {
-    exports.startMenuDir = null;
+let dirCache = new WeakMap();
+let getAndCachePath = function(key) {
+  if (dirCache.has(key))
+    return dirCache.get(key);
+  let path;
+  try {
+    path = dirsvc.get(key, Ci.nsIFile).path;
+  } catch(ex) {
+    path = null;
+  }
+  dirCache.set(key, path);
+  return path;
 }
-/**
- * The path to the user's desktop.
- * @type string
- */
-exports.desktopDir = dirsvc.get("Desk", Ci.nsIFile).path;
 
-/**
- * The path to the currently logged in user's home directory.
- * @type string
- */
-exports.userHomeDir =  dirsvc.get("Home", Ci.nsIFile).path;
+let resPaths = [];
 
-/**
- * In chromeless, *profiles* are specially named directories stored
- * in a user scoped location.  Support for multiple profiles is built in at a very
- * low level, and the basic mechanism by which profiles are supported is a two
- * level directory structure.  This property provides the path to the "outer" or
- * "root" profile directory, under which different profiles reside.
- * @type string
- */
-exports.profileRootDir =  dirsvc.get("DefProfRt", Ci.nsIFile).path;
+module.exports = Object.freeze({
+  /**
+   * The currently active *profile*, which is a user specific directory where
+   * user scoped application data may reside, such as preferences and history.
+   *
+   * @type string
+   */
+  get profileDir() {
+    const key = "ProfD";
+    return getAndCachePath(key);
+  },
 
-/**
- * The path to the directory where web plugins will be loaded for this
- * application.
- * @type string
- */
-exports.pluginsDir =  dirsvc.get("APlugns", Ci.nsIFile).path;
+  /**
+   * The path where the *browser code* of the application resides on disk.
+   * For an installed application this usually be nested inside of a system wide installation path.
+   * This path should be expected to be read-only.
+   * @type string
+   */
+  get browserCodeDir() {
+    return Path.join(dirsvc.get("DefRt", Ci.nsIFile).parent.path, "app_code");
+  },
 
-/**
- * The current working directory of the chromeless application process.
- * @type string
- */
-exports.curDir =  dirsvc.get("CurProcD", Ci.nsIFile).path;
+  /**
+   * @property startMenuDir
+   * On windows, the path to the start menu where shortcuts may be installed.
+   * `null` on other platforms.
+   * @type string
+   */
+  get startMenuDir() {
+    // Will return NULL if we're not on windows (no start menu dir).
+    const key = "Progs";
+    return getAndCachePath(key);
+  },
 
-/**
- * The system's temporary directory.
- * @type string
- */
-exports.tmpDir =  dirsvc.get("TmpD", Ci.nsIFile).path;
+  /**
+   * The path to the user's desktop.
+   * @type string
+   */
+  get desktopDir() {
+    const key = "Desk";
+    return getAndCachePath(key);
+  },
 
-// we don't need this anymore, let the GC do its job (eventually)
-dirsvc = null;
+  /**
+   * The path to the currently logged in user's home directory.
+   * @type string
+   */
+  get userHomeDir() {
+    const key = "Home";
+    return getAndCachePath(key);
+  },
+
+  /**
+   * In chromeless, *profiles* are specially named directories stored
+   * in a user scoped location.  Support for multiple profiles is built in at a very
+   * low level, and the basic mechanism by which profiles are supported is a two
+   * level directory structure.  This property provides the path to the "outer" or
+   * "root" profile directory, under which different profiles reside.
+   * @type string
+   */
+  get profileRootDir() {
+    const key = "DefProfRt";
+    return getAndCachePath(key);
+  },
+
+  /**
+   * The path to the directory where web plugins will be loaded for this
+   * application.
+   * @type string
+   */
+  get pluginsDir() {
+    const key = "APlugns";
+    return getAndCachePath(key);
+  },
+
+  /**
+   * The current working directory of the chromeless application process.
+   * @type string
+   */
+  get curDir() {
+    const key = "CurProcD";
+    return getAndCachePath(key);
+  },
+
+  /**
+   * The system's temporary directory.
+   * @type string
+   */
+  get tmpDir() {
+    const key = "TmpD";
+    return getAndCachePath(key);
+  },
+
+  get resourcePaths() {
+    return resPaths;
+  },
+
+  setResourcePaths: function(val = []) {
+    resPaths = [].concat(val);
+  }
+});

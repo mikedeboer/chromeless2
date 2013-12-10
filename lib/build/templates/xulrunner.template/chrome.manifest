@@ -2,6 +2,10 @@ component {6724fc1b-3ec4-40e2-8583-8061088b3185} components/app-startup.js
 contract @mozilla.org/sdk/app-startup;1 {6724fc1b-3ec4-40e2-8583-8061088b3185}
 category app-startup sdk @mozilla.org/sdk/app-startup;1
 
+component {5f2c73b0-406a-4287-932d-a5e1af4ccb13} components/cli.js
+contract @mozilla.org/commandlinehandler/general-startup;1?type=chromeless {5f2c73b0-406a-4287-932d-a5e1af4ccb13}
+category command-line-handler m-chromeless @mozilla.org/commandlinehandler/general-startup;1?type=chromeless
+
 resource app-bootstrap components/
 
 content chromeless chromeless/content/

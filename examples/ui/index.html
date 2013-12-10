@@ -35,6 +35,7 @@
         <script type="text/javascript">
             var ui = require("ui");
             var menu = require("menu");
+            var spawn = require("child_process").spawn;
             
             function inspect(o) {
                 var s = "";
@@ -135,6 +136,15 @@
                     alert("What are you looking at?!");
                 };
             }
+
+            var child = spawn("/bin/echo", ["'blah'"]);
+            child.stdout.setEncoding("utf8");
+            child.stdout.on("data", function(data) {
+                console.log("GOTS DATA:::", data);
+            });
+            child.on("exit", function(code) {
+                console.log("Exited with code ", code);
+            })
         </script>
     </head>
     <body onload="start()">

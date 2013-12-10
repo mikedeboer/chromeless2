@@ -44,6 +44,7 @@
 const {Ci, Cc, Cr, Cu} = require("chrome");
 const path = require("path");
 const appinfo = require("appinfo");
+const AppPaths = require("app-paths");
 
 let appWindow = null;
 
@@ -169,6 +170,8 @@ exports.main = function main(options, testCallbacks) {
                .getService(Ci.nsIChromeRegistry);
     cr.checkForNewChrome();
   }
+
+  AppPaths.setResourcePaths(Object.keys(options.resources));
 
   console.log("Loading browser using: " + startPage);
 

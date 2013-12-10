@@ -9,7 +9,7 @@
                   "widget.js", "windows.js",
                   "addon", "browser", "content", "dom", "frame", "keyboard",
                   "l10n", "loader", "page-mod", "panel", "passwords", "places",
-                  "preferences", "private-browsing", "tab", "tabs", "test", "ui",
+                  "private-browsing", "tab", "tabs", "test", "ui",
                   "view", "window", "windows", "worker"],
       "include": [
         ["addon-sdk", "lib", "toolkit", "loader.js"]
