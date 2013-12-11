@@ -17,7 +17,7 @@
   },
   "mainModule": "main",
   "staticArgs": {
-    "browser": "app_code/index.html"
+    "app": "app_code/index.html"
   },
   "mappings": {
     "path": "sdk/fs/path"

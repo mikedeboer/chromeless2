@@ -35,7 +35,7 @@ function exitWithError(err, code) {
 
 // A small script to invoke cfx from the jetpack platform with proper arguments.
 // accepts a single argument on the command line which is the path to the
-// "entry point HTML" - that which should be used as the browser's UI.
+// "entry point HTML" - that which should be used as the app's UI.
 
 // set the cuddlefish "root directory" for this process if it's not already
 // set in the environment
@@ -58,12 +58,12 @@ if (argc > 1 && Build.executionModes[argv[1]]) {
     case "package":
       Util.log("Packaging a xulrunner application (directory) into build/");
       if (arc > 2)
-        appToLaunch = Util.findBrowserHTML(argv[2]);
+        appToLaunch = Util.findAppHTML(argv[2]);
       break;
     case "appify":
       Util.log("Generating a standalone, redistributable, application");
       if (argc > 2)
-        appToLaunch = Util.findBrowserHTML(argv[2]);
+        appToLaunch = Util.findAppHTML(argv[2]);
       break;
     case "docs":
       Util.log("Generating documentation");
@@ -72,20 +72,20 @@ if (argc > 1 && Build.executionModes[argv[1]]) {
       Util.log("Running Chromeless tests");
       break;
     default:
-      appToLaunch = Util.findBrowserHTML(argv[2]);
+      appToLaunch = Util.findAppHTML(argv[2]);
       break;
   }
 }
 
 if (!appToLaunch) {
-  appToLaunch = Util.findBrowserHTML(Path.join(cwd, "examples",
+  appToLaunch = Util.findAppHTML(Path.join(cwd, "examples",
     "api-demo", "index.html"));
 }
 
-// Throw an error message if we can't figure out what html file is the browser's
+// Throw an error message if we can't figure out what html file is the app's
 // HTML entry point
 if (!Fs.existsSync(appToLaunch))
-  exitWithError("Can't find browser HTML (tried '" + appToLaunch + "')");
+  exitWithError("Can't find app HTML (tried '" + appToLaunch + "')");
 
 var fetcher = new Mozfetcher(buildDir, multi);
 fetcher.fetchIfNeeded(function(err, tarball) {

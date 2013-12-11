@@ -68,9 +68,9 @@ var Tray = function() {
     this.setIcon = function setIcon(appIcon) {
         appIcon = decodeURIComponent(appIcon);
         if (appIcon.indexOf("file://") > -1)
-            appIcon = appIcon.replace(/^.*browser_code\//, "");
-        if (appIcon.indexOf(paths.browserCodeDir) === -1) {
-            appIcon = paths.browserCodeDir.replace(/[\/]+$/, "") + "/browser_code/" 
+            appIcon = appIcon.replace(/^.*app_code\//, "");
+        if (appIcon.indexOf(paths.appCodeDir) === -1) {
+            appIcon = paths.appCodeDir.replace(/[\/]+$/, "") + "/app_code/" 
                 + appIcon.replace(/^[\/]+/, "");
         }
 

@@ -227,7 +227,7 @@ var appInfoContents = undefined;
 module.exports = {
   get contents() {
     if (!appInfoContents) {
-      var contents = file.read(path.join(appPaths.browserCodeDir, 'appinfo.json'));
+      var contents = file.read(path.join(appPaths.appCodeDir, 'appinfo.json'));
       try {
         appInfoContents = JSON.parse(contents);
       } catch(e) {

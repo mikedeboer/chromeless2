@@ -129,22 +129,22 @@ exports.main = function main(options, testCallbacks) {
   let call = options.staticArgs;
   const contentWindow = require("sandbox-window");
 
-  let file = path.basename(call.browser);
+  let file = path.basename(call.app);
 
   let systemMode = appinfo.contents.enableSystemPrivileges ? true : false;
 
   let rootPath, startPage;
   if (systemMode) {
-    rootPath = path.join(call.appBasePath, path.dirname(call.browser));
+    rootPath = path.join(call.appBasePath, path.dirname(call.app));
     startPage = require("sdk/url").fromFilename(call.appBasePath);
     let protocol = require("custom-protocol").register("chromeless");
     protocol.setHost("main", startPage , "system");
-    startPage = "chromeless://main/" + call.browser;
+    startPage = "chromeless://main/" + call.app;
   } else {
-    // convert browser url into a resource:// url
-    // i.e. 'browser_code/index.html' is mapped to 'resource://app/index.html'
-    let file = path.basename(call.browser);
-    rootPath = path.join(call.appBasePath, path.dirname(call.browser));
+    // convert app url into a resource:// url
+    // i.e. 'app_code/index.html' is mapped to 'resource://app/index.html'
+    let file = path.basename(call.app);
+    rootPath = path.join(call.appBasePath, path.dirname(call.app));
     startPage = "resource://app/" + file;
 
     ios = Cc["@mozilla.org/network/io-service;1"]
@@ -169,7 +169,7 @@ exports.main = function main(options, testCallbacks) {
 
   AppPaths.setResourcePaths(Object.keys(options.resources));
 
-  console.log("Loading browser using: " + startPage);
+  console.log("Loading app using: " + startPage);
 
   // enable debugging by default
   enableDebuggingOutputToConsole();

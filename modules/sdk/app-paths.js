@@ -75,12 +75,12 @@ module.exports = Object.freeze({
   },
 
   /**
-   * The path where the *browser code* of the application resides on disk.
+   * The path where the *app code* of the application resides on disk.
    * For an installed application this usually be nested inside of a system wide installation path.
    * This path should be expected to be read-only.
    * @type string
    */
-  get browserCodeDir() {
+  get appCodeDir() {
     return Path.join(dirsvc.get("DefRt", Ci.nsIFile).parent.path, "app_code");
   },
 
