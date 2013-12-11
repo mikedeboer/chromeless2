@@ -1,0 +1,19 @@
+<html>
+  <body onload="start()">
+    <div id="outer">
+      <div id="browserContentArea">
+        <p>
+#ifdef XP_OSX
+          <button onclick="runProcess()">Run a child process</button>
+#elseif XP_WIN
+          <button onclick="sysInfo()">Show available system info</button>
+#else
+          <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
+#endif
+        </p>
+        <button onclick="clearOutput()">Clear</button>
+        <pre id="outputArea"></pre>
+      </div>
+    </div>
+  </body>
+</html>
