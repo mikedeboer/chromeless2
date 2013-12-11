@@ -13,12 +13,14 @@
                   "view", "window", "windows", "worker"],
       "include": [
         ["addon-sdk", "lib", "toolkit", "loader.js"]
-      ]
+      ],
+      "preprocess": []
     },
     "sdk": {
       "path": ["sdk"],
       "exclude": [],
-      "include": []
+      "include": [],
+      "preprocess": []
     }
   }
 }
