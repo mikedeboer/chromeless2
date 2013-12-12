@@ -17,7 +17,7 @@
       }
     }
   },
-  "darwin": {
+  "osx": {
     "all": {
       "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/25.0b12/sdk/xulrunner-25.0b12.en-US.mac-x86_64.sdk.tar.bz2",
       "md5": "f601249c0eb9aa73e16f2398e77a9c3b",

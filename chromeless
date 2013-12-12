@@ -37,8 +37,6 @@ function exitWithError(err, code) {
 // accepts a single argument on the command line which is the path to the
 // "entry point HTML" - that which should be used as the app's UI.
 
-// set the cuddlefish "root directory" for this process if it's not already
-// set in the environment
 var cwd = process.cwd();
 
 // set the "build directory", where we'll output built artifacts, download xulrunner,
@@ -77,10 +75,8 @@ if (argc > 1 && Build.executionModes[argv[1]]) {
   }
 }
 
-if (!appToLaunch) {
-  appToLaunch = Util.findAppHTML(Path.join(cwd, "examples",
-    "api-demo", "index.html"));
-}
+if (!appToLaunch)
+  appToLaunch = Util.findAppHTML(Path.join(cwd, "examples", "api-demo", "index.html"));
 
 // Throw an error message if we can't figure out what html file is the app's
 // HTML entry point
