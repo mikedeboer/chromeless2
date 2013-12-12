@@ -3,7 +3,7 @@
     "addon-sdk": {
       "path": ["addon-sdk", "lib", "sdk"],
       "exclude": ["addon-page.js", "context-menu.js",
-                  "hotkeys.js", "l10n.js", "notifications.js", "page-mod.js",
+                  "hotkeys.js", "l10n.js", "page-mod.js",
                   "page-worker.js", "panel.js", "passwords.js", "private-browsing.js",
                   "selection.js", "simple-prefs.js", "tabs.js", "test.js", "ui.js",
                   "widget.js", "windows.js",

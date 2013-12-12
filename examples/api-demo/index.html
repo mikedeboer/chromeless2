@@ -172,6 +172,25 @@
       function toggleFullscreen() {
         require("fullscreen").toggle();
       }
+
+      function addToKeychain() {
+        require("keychain").setCredentials({
+          accountName: "foo",
+          serviceName: "bar",
+          password: "demo"
+        });
+      }
+
+      function getFromKeychain() {
+        var credentials = require("keychain").getCredentials({
+          accountName: "foo",
+          serviceName: "bar"
+        });
+        credentials.forEach(function(item) {
+          addOutputLine("Account: " + item.account);
+          addOutputLine("Password: " + item.password);
+        });
+      }
     </script>
   </head>
   <body onload="start()">
@@ -187,6 +206,8 @@
           <button onclick="runProcess()">Run a child process</button>
           <button onclick="sysInfo()">Show available system info</button>
           <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
+          <button onclick="addToKeychain()">Add to Keychain</button>
+          <button onclick="getFromKeychain()">Get from Keychain</button>
         </p>
         <button onclick="clearOutput()">Clear</button>
         <pre id="outputArea"></pre>

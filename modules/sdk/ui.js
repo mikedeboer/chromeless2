@@ -32,7 +32,7 @@
 
 const {Cc, Ci} = require("chrome");
 const timers = require("sdk/timers");
-const notifications = require("notifications");
+const notifications = require("sdk/notifications");
 const windows = require("sandbox-window");
 
 /**

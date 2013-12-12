@@ -52,22 +52,22 @@ const VALID_TYPES = [
   "undefined"
 ];
 
-function descriptor(object) {
+let descriptor = exports.descriptor = function descriptor(object) {
   let value = {};
   Object.getOwnPropertyNames(object).forEach(function(name) {
     value[name] = Object.getOwnPropertyDescriptor(object, name)
   });
   return value;
-}
+};
 
-function override(target, source) {
+let override = exports.override = function override(target, source) {
   let properties = descriptor(target)
   let extension = descriptor(source || {})
   Object.getOwnPropertyNames(extension).forEach(function(name) {
     properties[name] = extension[name];
   });
   return Object.defineProperties({}, properties);
-}
+};
 
 /**
  * Returns a function C that creates instances of privateCtor.  C may be called
@@ -90,6 +90,13 @@ exports.publicConstructor = function publicConstructor(privateCtor) {
   PublicCtor.prototype = override({}, privateCtor.prototype);
   return PublicCtor;
 };
+
+function Iterator(obj) {
+  for (let key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key))
+      yield [key, obj[key]];
+  }
+}
 
 /**
  * Returns a validated options dictionary given some requirements.  If any of
@@ -131,7 +138,7 @@ exports.validateOptions = function validateOptions(options, requirements) {
   let validatedOptions = {};
   let mapThrew = false;
 
-  for (let [key, req] in Iterator(requirements)) {
+  for (let [key, req] of Iterator(requirements)) {
     let [optsVal, keyInOpts] = (key in options) ?
                                [options[key], true] :
                                [undefined, false];
