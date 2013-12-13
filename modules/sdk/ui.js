@@ -30,16 +30,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const {Cc, Ci} = require("chrome");
+const {Cc, Ci, Cu} = require("chrome");
 const timers = require("sdk/timers");
-const notifications = require("sdk/notifications");
+const notifications = require("notifications");
 const windows = require("sandbox-window");
 
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+#ifdef XP_OSX
+XPCOMUtils.defineLazyServiceGetter(this, "MacDock",
+                                   "@mozilla.org/widget/macdocksupport;1",
+                                   "nsIMacDockSupport");
+#endif
 /**
  * Return the current window. This function does not exist outside of the context of a window.
  */
 exports.getCurrentWindow = function getCurrentWindow() {
-    //@todo
+  //@todo
 };
 
 /**
@@ -68,65 +74,16 @@ exports.getIdleTime = function getIdleTime() {
  */
 exports.getMenu = function getMenu() {
   let menuBar = this.getMainWindow().document.getElementById("theMenuBar");
-  // while (menuBar.firstChild)
-  //   menuBar.removeChild(menuBar.firstChild);
   return menuBar;
-};
-
-/**
- * Set a menu for the application
- */
-exports.setMenu = function setMenu() {
-  //@todo
-};
-
-/**
- * Return this application's context menu or null if none is set.
- */
-exports.getContextMenu = function getContextMenu() {
-  //@todo
-};
-
-/**
- * Set the application's context menu
- */
-exports.setContextMenu = function setContextMenu() {
-  //@todo
-};
-
-/**
- * Create a new menu
- */
-exports.createMenu = function createMenu() {
-  //@todo
-};
-
-/**
- * Create a new menu item.
- */
-exports.createMenuItem = function createMenuItem() {
-  //@todo
-};
-
-/**
- * Create a new separator menu item.
- */
-exports.createSeperatorMenuItem = function createSeperatorMenuItem() {
-  //@todo
-};
-
-/**
- * Create a new CheckMenuItem object.
- */
-exports.createCheckMenuItem = function createCheckMenuItem() {
-  //@todo
 };
 
 /**
  * Set the application icon's badge text.
  */
-exports.setBadge = function setBadge() {
-  //@todo
+exports.setBadge = function setBadge(text = "") {
+#ifdef XP_OSX
+  MacDock.badgeText = String(text);
+#endif
 };
 
 /**
@@ -146,8 +103,12 @@ exports.setDockIcon = function setDockIcon() {
 /**
  * Set the dock menu
  */
-exports.setDockMenu = function setDockMenu() {
-  //@todo
+exports.setDockMenu = function setDockMenu(menu) {
+  if (!menu)
+    return;
+#ifdef XP_OSX
+  dockMenu = menu;
+#endif
 };
 
 var crtIcon;
@@ -195,53 +156,13 @@ exports.showDialog = function showDialog() {
   //@todo
 };
 
-/**
- * Get notification box ("yellow bar").
- * Courtesy of bug 533649.
- */
-function getNotificationBox() {
-  /*let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-           .getService(Ci.nsIWindowMediator),
-      chromeWindow = wm.getMostRecentWindow("navigator"),
-      notificationBox = chromeWindow.getNotificationBox(tabs.activeTab.contentWindow);*/
-  //let chromeWindow = exports.getMainWindow();
-  //inspect(chromeWindow.document.contentWindow);
-  //let notificationBox = chromeWindow.getNotificationBox(chromeWindow.contentWindow);
-  //return notificationBox;
-}
-
 exports.showNotification = function showNotification(title, text, imageURI, textClickable, onClick, onFinish, data) {
-  try {
-    notifications.notify({
-      title: title,
-      iconURL: imageURI,
-      text: text,
-      onClick: onClick
-    });
-  }
-  catch (e) {
-    return;
-    let nb = getNotificationBox(),
-        notification = nb.appendNotification(
-          text,
-          'jetpack-notification-box',
-          imageURI || 'chrome://browser/skin/Info.png',
-          nb.PRIORITY_INFO_MEDIUM,
-          []
-        );
-    timers.setTimeout(function() {
-      notification.close();
-    }, 10 * 1000);
-  }
-  /*let alertObserver = {
-      observe: function(subject, topic, data) {
-          if ((topic === "alertclickcallback") && !!textClickable)
-              onClick && onClick();
-          else if (topic === "alertfinished")
-              onFinish && onFinish();
-      }
-  };
-  gAlertServ.showAlertNotification(imageURI, title, text, !!textClickable, data, alertObserver);*/
+  notifications.notify({
+    title: title,
+    iconURL: imageURI,
+    text: text,
+    onClick: onClick
+  });
 };
 
 exports.beep = function beep() {
@@ -260,11 +181,15 @@ exports.playSound = function playSound(soundURI) {
 };
 
 exports.getAttention = function getAttention(times) {
+#ifdef XP_OSX
+  MacDock.activateApplication(true);
+#else
   let win = exports.getMainWindow();
   if (typeof times == "number")
     win.getAttentionWithCycleCount(times);
   else
     win.getAttention();
+#endif
 };
 
 exports.getUUID = function() {

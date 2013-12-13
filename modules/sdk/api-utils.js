@@ -23,6 +23,7 @@
  * Contributor(s):
  *   Drew Willcoxon <adw@mozilla.com> (Original Author)
  *   Edward Lee <edilee@mozilla.com>
+ *   Mike de Boer <mdeboer@mozilla.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -39,6 +40,14 @@
  * ***** END LICENSE BLOCK ***** */
 
 "use strict";
+
+const {Cu} = require("chrome");
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
+XPCOMUtils.defineLazyGetter(exports, "hiddenWindow", function() {
+  return Services.appShell.hiddenDOMWindow;
+});
 
 // The possible return values of getTypeOf.
 const VALID_TYPES = [
@@ -67,6 +76,16 @@ let override = exports.override = function override(target, source) {
     properties[name] = extension[name];
   });
   return Object.defineProperties({}, properties);
+};
+
+exports.getHiddenHTMLWindow = function getHiddenHTMLWindow() {
+  let hiddenWindow = exports.hiddenDOMWindow;
+#ifndef XP_MACOSX
+  return exports.hiddenWindow;
+#else
+  let browser = exports.hiddenWindow.document.getElementById("hiddenBrowser");
+  return browser.docShell ? browser.contentWindow : hiddenWindow;
+#endif
 };
 
 /**
@@ -158,8 +177,9 @@ exports.validateOptions = function validateOptions(options, requirements) {
           throw new Error(msg);
         }
       });
-      if (req.is.indexOf(getTypeOf(optsVal)) < 0)
-        throw requirementError(key, req);
+      let type = getTypeOf(optsVal);
+      if (req.is.indexOf(type) < 0)
+        throw requirementError(key, req, type);
     }
     if (req.ok && !req.ok(optsVal))
       throw requirementError(key, req);
@@ -197,13 +217,13 @@ let getTypeOf = exports.getTypeOf = function getTypeOf(val) {
 }
 
 // Returns a new Error with a nice message.
-function requirementError(key, requirement) {
+function requirementError(key, requirement, expected) {
   let msg = requirement.msg;
   if (!msg) {
     msg = 'The option "' + key + '" ';
     msg += requirement.is ?
            "must be one of the following types: " + requirement.is.join(", ") :
-           "is invalid.";
+           "is invalid." + (expected ? " Expected '" + expected + "'." : "");
   }
   return new Error(msg);
 }

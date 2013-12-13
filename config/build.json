@@ -20,7 +20,7 @@
       "path": ["sdk"],
       "exclude": [],
       "include": [],
-      "preprocess": []
+      "preprocess": ["api-utils.js", "ui.js"]
     }
   }
 }

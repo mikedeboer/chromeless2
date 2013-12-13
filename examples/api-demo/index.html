@@ -76,6 +76,11 @@
         var sound = document.location.href.replace("index.html", "") + "office_lobby.mp3";
         ui.playSound(sound);
       }
+
+      var incr = 0;
+      function setBadge() {
+        ui.setBadge(++incr + "x");
+      }
       
       function addTray() {
         var icon = document.location.href.replace("index.html", "") + "firefox.ico";
@@ -201,6 +206,7 @@
           <button onclick="attention()">Attention!</button>
           <button onclick="beep()">Sound a BEEP</button>
           <button onclick="playSound()">Play an MP3</button>
+          <button onclick="setBadge()">Set Badge text (OSX)</button>
           <button onclick="addTray()">Update tray/ dock icon</button>
           <button onclick="updateMenu()">Update the application menu</button>
           <button onclick="runProcess()">Run a child process</button>

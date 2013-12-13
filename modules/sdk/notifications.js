@@ -22,6 +22,7 @@
  *
  * Contributor(s):
  *   Drew Willcoxon <adw@mozilla.com> (Original Author)
+ *   Mike de Boer <mdeboer@mozilla.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,15 +38,37 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const { Cc, Ci, Cr } = require("chrome");
-const apiUtils = require("api-utils");
+const {Cc, Ci, Cu, Cr} = require("chrome");
+const {validateOptions, getHiddenHTMLWindow} = require("api-utils");
 
+Cu.import("resource://gre/modules/Services.jsm");
+
+const validations = {
+  "data": {
+    "is": ["string", "null", "undefined"]
+  },
+  "iconURL": {
+    "is": ["string", "null", "undefined"]
+  },
+  "onClick": {
+    "is": ["function", "null", "undefined"]
+  },
+  "text": {
+    "is": ["string"]
+  },
+  "title": {
+    "is": ["string"]
+  }
+};
+const kHtmlNs = "http://www.w3.org/1999/xhtml";
+
+var notify;
 try {
   let alertServ = Cc["@mozilla.org/alerts-service;1"].
                   getService(Ci.nsIAlertsService);
 
   // The unit test sets this to a mock notification function.
-  var notify = alertServ.showAlertNotification.bind(alertServ);
+  notify = alertServ.showAlertNotification.bind(alertServ);
 }
 catch (err) {
   // An exception will be thrown if the platform doesn't provide an alert
@@ -54,33 +77,6 @@ catch (err) {
   notify = notifyUsingConsole;
 }
 
-exports.notify = function notifications_notify(options) {
-  let valOpts = validateOptions(options);
-  let clickObserver = !valOpts.onClick ? null : {
-    observe: function notificationClickObserved(subject, topic, data) {
-      if (topic === "alertclickcallback")
-        valOpts.onClick.call(exports, valOpts.data);
-    }
-  };
-  function notifyWithOpts(notifyFn) {
-    notifyFn(valOpts.iconURL, valOpts.title, valOpts.text, !!clickObserver,
-             valOpts.data, clickObserver);
-  }
-  try {
-    notifyWithOpts(notify);
-  }
-  catch (err if err instanceof Ci.nsIException &&
-                err.result == Cr.NS_ERROR_FILE_NOT_FOUND) {
-    console.warn("The notification icon named by " + valOpts.iconURL +
-                 " does not exist.  A default icon will be used instead.");
-    delete valOpts.iconURL;
-    notifyWithOpts(notify);
-  }
-  catch (err) {
-    notifyWithOpts(notifyUsingConsole);
-  }
-};
-
 function notifyUsingConsole(iconURL, title, text) {
   title = title ? "[" + title + "]" : "";
   text = text || "";
@@ -88,22 +84,61 @@ function notifyUsingConsole(iconURL, title, text) {
   console.log(str);
 }
 
-function validateOptions(options) {
-  return apiUtils.validateOptions(options, {
-    data: {
-      is: ["string", "undefined"]
-    },
-    iconURL: {
-      is: ["string", "undefined"]
-    },
-    onClick: {
-      is: ["function", "undefined"]
-    },
-    text: {
-      is: ["string", "undefined"]
-    },
-    title: {
-      is: ["string", "undefined"]
-    }
-  });
+function getEllipsis() {
+  let ellipsis = "[\u2026]";
+
+  try {
+    ellipsis = Services.prefs.getComplexValue("intl.ellipsis",
+                                              Ci.nsIPrefLocalizedString).data;
+  } catch (ex) {}
+  return ellipsis;
 }
+
+function sanitizeText(message) {
+  // Put the message content into a div node of the hidden HTML window.
+  let doc = getHiddenHTMLWindow().document;
+  let xhtmlElement = doc.createElementNS(kHtmlNs, "div");
+  xhtmlElement.innerHTML = message.replace(/<br>/gi, "<br/>");
+
+  // Convert the div node content to plain text.
+  let encoder = Cc["@mozilla.org/layout/documentEncoder;1?type=text/plain"]
+                  .createInstance(Ci.nsIDocumentEncoder);
+  encoder.init(doc, "text/plain", 0);
+  encoder.setNode(xhtmlElement);
+  let messageText = encoder.encodeToString().replace(/\s+/g, " ");
+
+  // Crop the end of the text if needed.
+  if (messageText.length > 50)
+    messageText = messageText.substr(0, 50) + getEllipsis();
+  return messageText;
+}
+
+exports.notify = function notifications_notify(options) {
+  let valOpts = validateOptions(options, validations);
+  // Sanitize message
+  valOpts.text = sanitizeText(valOpts.text);
+
+  let clickObserver = !valOpts.onClick ? null : {
+    observe: function notificationClickObserved(subject, topic, data) {
+      if (topic === "alertclickcallback")
+        valOpts.onClick.call(exports, valOpts.data);
+    }
+  };
+
+  function notifyWithOpts(notifyFn) {
+    notifyFn(valOpts.iconURL, valOpts.title, valOpts.text, !!clickObserver,
+             valOpts.data, clickObserver);
+  }
+
+  try {
+    notifyWithOpts(notify);
+  } catch (err if err instanceof Ci.nsIException &&
+                  err.result == Cr.NS_ERROR_FILE_NOT_FOUND) {
+    console.warn("The notification icon named by " + valOpts.iconURL +
+                 " does not exist.  A default icon will be used instead.");
+    delete valOpts.iconURL;
+    notifyWithOpts(notify);
+  } catch (err) {
+    notifyWithOpts(notifyUsingConsole);
+  }
+};
