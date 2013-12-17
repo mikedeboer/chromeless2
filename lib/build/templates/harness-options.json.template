@@ -20,6 +20,7 @@
     "app": "app_code/index.html"
   },
   "mappings": {
-    "path": "sdk/fs/path"
+    "path": "sdk/fs/path",
+    "fs": "sdk/io/fs"
   }
 }
