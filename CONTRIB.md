@@ -4,6 +4,7 @@
 
   * Lloyd Hilaiel - @lloyd
   * Marcio Galli - @mgalli
+  * Mike de Boer - @mdeboer
 
 ## Libraries
 
