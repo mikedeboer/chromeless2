@@ -110,7 +110,7 @@ exports.publicConstructor = function publicConstructor(privateCtor) {
   return PublicCtor;
 };
 
-function Iterator(obj) {
+exports.Iterator = function Iterator(obj) {
   for (let key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key))
       yield [key, obj[key]];

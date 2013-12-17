@@ -33,50 +33,14 @@
 "use strict";
 
 const {Ci, Cu} = require("chrome");
+const {env: Env} = require("sdk/system/environment");
+const {Iterator} = require("api-utils");
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "GetArgv", "resource://app-bootstrap/cli.js");
 
-/*
- * API from the NodeJS documentation:
- * Event: 'exit'
- * Event: 'uncaughtException'
- * <Signal Events>
- * process.stdout
- * process.stderr
- * process.stdin
- * process.argv
- * process.execPath
- * process.execArgv
- * process.abort()
- * process.chdir(directory)
- * process.cwd()
- * process.env
- * process.exit([code])
- * process.getgid()
- * process.setgid(id)
- * process.getuid()
- * process.setuid(id)
- * process.getgroups()
- * process.setgroups(groups)
- * process.initgroups(user, extra_group)
- * process.version
- * process.versions
- * process.config
- * process.kill(pid, [signal])
- * process.pid
- * process.title
- * process.arch
- * process.platform
- * process.memoryUsage()
- * process.nextTick(callback)
- * process.maxTickDepth
- * process.umask([mask])
- * process.uptime()
- * process.hrtime()
- */
 const platformMappings = {
   "winnt": "win32"
 };
@@ -86,6 +50,32 @@ const archMappings = {
   "x86_64": "x64",
   "ia64": "x64"
 }
+
+// This is a list of common ENV vars, but it is by no means exhaustive. Please
+// feel free to add to this list and open a pull request on Github!
+const envVars = {
+  "CLICOLOR": "CLICOLOR",
+  "COMMAND_MODE": "COMMAND_MODE",
+  "EDITOR": "EDITOR",
+  "GREP_OPTIONS": "GREP_OPTIONS",
+  "HOME": "HOME",
+  "LANG": "LANG",
+  "LC_CTYPE": "LC_CTYPE",
+  "LOGNAME": "LOGNAME",
+  "LSCOLORS": "LSCOLORS",
+  "MANPATH": "MANPATH",
+  "OLDPWD": "OLDPWD",
+  "PATH": "PATH",
+  "PWD": "PWD",
+  "SHELL": "SHELL",
+  "SHLVL": "SHLVL",
+  "SSH_AUTH_SOCK": "SSH_AUTH_SOCK",
+  "TERM": "TERM",
+  "TMPDIR": ["TMPDIR", "TMP", "TEMP"],
+  "USER": "USER"
+};
+
+let envCache = null;
 
 const notImplementedYet = function() {
   throw new Error("Not implemented yet!");
@@ -111,7 +101,20 @@ module.exports = Object.freeze({
   },
 
   get env() {
-    notImplementedYet();
+    if (!envCache) {
+      envCache = {};
+      for (let [name, aliases] of Iterator(envVars)) {
+        if (!Array.isArray(aliases))
+          aliases = [aliases];
+        for (let alias of aliases) {
+          if (!(alias in Env))
+            continue;
+          envCache[name] = Env[alias];
+          break;
+        }
+      }
+    }
+    return envCache;
   },
 
   exit: function(code = 0) {

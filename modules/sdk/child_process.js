@@ -39,6 +39,7 @@ const {emit} = require("sdk/event/core");
 const {Class} = require("sdk/core/heritage");
 const {Subprocess} = require("child_process/subprocess");
 const {resourcePaths} = require("app-paths");
+const process = require("process");
 
 Subprocess.setWorkerPath("resource://" +
   resourcePaths.filter(path => /[^(:?addon\-)]+\-sdk$/.test(path))[0] +
@@ -99,7 +100,7 @@ exports.spawn = function(file, args, options) {
   args = args ? args.slice(0) : [];
   args.unshift(file);
 
-  let env = options ? options.env : {};//) || process.env;
+  let env = options ? options.env : process.env;
   let envPairs = [];
   for (let key in env)
     envPairs.push(key + "=" + env[key]);
