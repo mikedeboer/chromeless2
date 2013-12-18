@@ -87,13 +87,6 @@ exports.setBadge = function setBadge(text = "") {
 };
 
 /**
- * Set the application icon's badge image.
- */
-exports.setBadgeImage = function setBadgeImage() {
-  //@todo
-};
-
-/**
  * Set the dock icon
  */
 exports.setDockIcon = function setDockIcon() {

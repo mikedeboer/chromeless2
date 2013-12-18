@@ -183,7 +183,7 @@ exports.addIterator = function addIterator(obj, keysValsGenerator) {
 
 // Similar to typeof, except arrays and null are identified by "array" and
 // "null", not "object".
-let getTypeOf = exports.getTypeOf = function getTypeOf(val) {
+const getTypeOf = exports.getTypeOf = function getTypeOf(val) {
   let typ = typeof(val);
   if (typ === "object") {
     if (!val)

@@ -25,8 +25,8 @@ const kBlankXul = '<?xml version="1.0"?>' +
                   kNsXhtml + '" xmlns="' + kNsXul + '">' + kMenubar + '</window>';
 
 function isTopLevelWindow(w) {
-  for (let i = 0; i < gWindows.length; i++) {
-    if ("_browser" in gWindows[i])
+  for (let window of gWindows) {
+    if ("_browser" in window)
       return true;
   }
   return false;
@@ -36,41 +36,38 @@ let checkWindows = function(subject, url) {
   let window = subject.window;
   if (window.top != window.self) {
     if (isTopLevelWindow(window.parent)) {
-      // top level iframe window
+      // Top level iframe window
       let ifWin = window.self;
       ifWin.wrappedJSObject.eval("window.top = window.self");
       ifWin.wrappedJSObject.eval("window.parent = window.self");
     } else {
-      // this is a frame nested underneath the top level frame
+      // This is a frame nested underneath the top level frame
       let ifWin = window.self;
       ifWin.wrappedJSObject.eval("window.top = window.parent.top");
     }
   } else if (isTopLevelWindow(window)) {
-    // this is application code!  let's handle injection at this point.
-    let i;
-    for (i = 0; i < gWindows.length; i++) {
-      if (gWindows[i]._browser && gWindows[i]._browser.contentWindow == window)
-        break;
+    // This is application code! Let's handle injection at this point.
+    let wo;
+    for (wo of gWindows) {
+      if (!wo._browser || wo._browser.contentWindow != window)
+        wo = null;
     }
+    if (!wo)
+      return;
 
-    if (i < gWindows.length) {
-      let wo = gWindows[i];
-      // "requiring" the prevent navigation module will install a content policy
-      // that disallows changing the root HTML page.
-      require("prevent-navigation");
+    // "requiring" the prevent navigation module will install a content policy
+    // that disallows changing the root HTML page.
+    require("prevent-navigation");
 
-      let sandbox = new Cu.Sandbox(
-        Cc["@mozilla.org/systemprincipal;1"]
-          .createInstance(Ci.nsIPrincipal)
-      );
+    let sandbox = new Cu.Sandbox(
+      Cc["@mozilla.org/systemprincipal;1"]
+        .createInstance(Ci.nsIPrincipal)
+    );
+    sandbox.window = subject.wrappedJSObject;
 
-      sandbox.window = subject.wrappedJSObject;
-
-      for (var k in wo.options.injectProps) {
-        sandbox[k] = wo.options.injectProps[k];
-
-        Cu.evalInSandbox("window."+k+" = "+k+";", sandbox);
-      }
+    for (var k in wo.options.injectProps) {
+      sandbox[k] = wo.options.injectProps[k];
+      Cu.evalInSandbox("window."+k+" = "+k+";", sandbox);
     }
   }
 };

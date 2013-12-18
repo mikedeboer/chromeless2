@@ -127,7 +127,7 @@ exports.main = function main(options, testCallbacks) {
   const ai = appinfo.contents;
 
   let call = options.staticArgs;
-  const contentWindow = require("sandbox-window");
+  const {Window} = require("sandbox-window");
 
   let file = path.basename(call.app);
 
@@ -177,7 +177,7 @@ exports.main = function main(options, testCallbacks) {
   // Page window height and width is fixed, it won't be and it also should be
   // smart, so HTML browser developer can change it when they set inner document
   // width and height.
-  appWindow = new contentWindow.Window({
+  appWindow = new Window({
     url: startPage,
     width: 800,
     height: 600,

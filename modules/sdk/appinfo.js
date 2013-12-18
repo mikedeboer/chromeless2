@@ -16,6 +16,7 @@
  * Contributor(s):
  *   Michael Hanson <mhanson@mozilla.com>
  *   Lloyd Hilaiel <lloyd@mozilla.com>
+ *   Mike de Boer <mdeboer@mozilla.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -31,174 +32,180 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+"use strict";
+
+const AppPaths = require("app-paths");
+const {Iterator} = require("api-utils");
+const Fs = require("fs");
+const Path = require("path");
+
+const errorThrow = function(msg, path) {
+  if (path && !Array.isArray(path))
+    path = [path];
+  throw {
+    msg: msg,
+    path: (path ? path : []),
+    toString: function () {
+      if (this.path && this.path.length)
+        return "(" + Path.join.apply(Path, this.path) + ") " + this.msg;
+      return this.msg;
+    }
+  };
+};
+
+// Commonly used check functions
+const isInteger = function(x) {
+  return (typeof x == "number" && Math.ceil(x) == Math.floor(x));
+};
+
+const nonEmptyStringCheck = function(x) {
+  if (typeof x != "string" || x.length === 0)
+    errorThrow();
+};
+
+const stringCheck = function(x) {
+  if (typeof x != "string")
+    errorThrow();
+};
+
+const booleanCheck = function(x) {
+  if (typeof x != "boolean")
+    errorThrow();
+};
+
+// a table that specifies manfiest properties, and validation functions
+// each key is the name of a valid top level property.
+// each value is an object with four optional properties:
+//  required: if present and has a truey value, then the prop is required
+//  check: if present and a function for a value, then is passed a value present in appinfo for validation
+//  normalize: if present and has a function for a value, then accepts current value
+//             in appinfo as argument, and outputs a value to replace it.
+//
+// returning errors:
+//   validation functions throw objects with two fields:
+//     msg: an english, developer readable error message
+//     path: an array of properties that describes which field has the error
+//
+const manfProps = {
+  build_id: {
+    required: true,
+    // Allow build_id to be an integer or a string of all digits
+    check: function(x) {
+      if (isInteger(x) || (typeof x === "string" && /^[1-9][0-9]*$/.test(x)))
+        return;
+      errorThrow();
+    },
+    // Normalize build_id to an integer 
+    normalize: function(x) {
+      return (typeof x === "string") ? parseInt(x) : x;
+    }
+  },
+  developer_email: {
+    required: true,
+    check: nonEmptyStringCheck
+  },
+  menubar: {
+    required: false,
+    check: booleanCheck
+  },
+  module_dirs: {
+    required: false,
+    check: function(x) {
+      if (!Array.isArray(x))
+        errorThrow();
+      x.forEach(y => stringCheck(y));
+    }
+  },
+  name: {
+    required: true,
+    check: nonEmptyStringCheck
+  },
+  shortname: {
+    required: false
+  },
+  resizable: {
+    required: false,
+    check: booleanCheck
+  },
+  vendor: {
+    required: true,
+    check: nonEmptyStringCheck
+  },
+  enableSystemPrivileges: {
+    required: false,
+    check: booleanCheck
+  },
+  version: {
+    required: true,
+    check: function(x) {
+      if (typeof x != "string" || !/^[0-9]+\.[0-9]+$/.test(x))
+        errorThrow();
+    }
+  }
+};
+
+const manfAliases = {
+  menubars: "menubar"
+};
+
+
+// A function to extract nested values given an object and array of property names
+function extractValue(obj, props) {
+  return ((props.length === 0) ? obj : extractValue(obj[props[0]], props.slice(1)));
+}
+
+// A function that will validate properties of a manfiest using the manfProps
+// data structure above. Returns a normalized version of the appinfo, throws upon
+// detection of invalid properties.
+function validateAppinfoProperties(manf) {
+  let normalizedManf = {};
+  for (let [prop, pSpec] of Iterator(manf)) {
+    if (!(prop in manfProps))
+      errorThrow("unsupported property", prop);
+    if (typeof pSpec.check == "function") {
+      try {
+        pSpec.check(manf[prop]);
+      } catch (e) {
+        e.path.unshift(prop);
+        if (!e.msg)
+          e.msg = "invalid value: " + extractValue(manf, e.path);
+        throw e;
+      }
+    }
+    if (typeof pSpec.normalize == "function") {
+      normalizedManf[prop] = pSpec.normalize(manf[prop]);
+      // Special case. A normalization function can remove properties by
+      // returning undefined.
+      if (normalizedManf[prop] === undefined)
+        delete normalizedManf[prop];
+    } else {
+      normalizedManf[prop] = manf[prop];
+    }
+  }
+  return normalizedManf;
+}
 
 // validate a javascript representation of an appinfo.json, throw nice error objects
 // if something ain't right
 function validate(manf) {
-  var errorThrow = function(msg, path) {
-    if (path != undefined && typeof path != 'object') path = [ path ];
-    throw {
-      msg: msg,
-      path: (path ? path : [ ]),
-      toString: function () {
-        if (this.path && this.path.length > 0) return ("(" + this.path.join("/") + ") " + this.msg);
-        return this.msg;
-      }
-    };
-  };
-
   // Validate and clean the request
-  if(!manf) {
-    errorThrow('null');
-  }
-
-  // commonly used check functions
-  var isInteger = function(x) {
-    return (typeof x === 'number' && Math.ceil(x) == Math.floor(x));
-  };
-
-  // commonly used check functions
-  var nonEmptyStringCheck = function(x) {
-    if ((typeof x !== 'string') || x.length === 0) errorThrow();
-  };
-
-  var stringCheck = function(x) {
-    if (typeof x !== 'string') errorThrow();
-  };
-
-  var booleanCheck = function(x) {
-    if (typeof x !== 'boolean') errorThrow();
-  };
-
-  var integerCheck = function(x) {
-    if (!isInteger(x)) errorThrow();
-  };
-
-  // a table that specifies manfiest properties, and validation functions
-  // each key is the name of a valid top level property.
-  // each value is an object with four optional properties:
-  //  required: if present and has a truey value, then the prop is required
-  //  check: if present and a function for a value, then is passed a value present in appinfo for validation
-  //  normalize: if present and has a function for a value, then accepts current value
-  //             in appinfo as argument, and outputs a value to replace it.
-  //
-  // returning errors:
-  //   validation functions throw objects with two fields:
-  //     msg: an english, developer readable error message
-  //     path: an array of properties that describes which field has the error
-  //
-  var manfProps = {
-    build_id: {
-      required: true,
-      // allow build_id to be an integer or a string of all digits
-      check: function(x) {
-        if (isInteger(x) ||
-            (typeof(x) === 'string' && x.match(/^[1-9][0-9]*$/)))
-          return;
-        errorThrow();
-      },
-      // normalize build_id to an integer 
-      normalize: function(x) {
-        return (typeof x === 'string') ? parseInt(x) : x;
-      }
-    },
-    developer_email: {
-      required: true,
-      check: nonEmptyStringCheck
-    },
-    menubar: {
-      required: false,
-      check: booleanCheck
-    },
-    module_dirs: {
-      required: false,
-      check: function(x) {
-        if (!Array.isArray(x)) errorThrow();
-        x.forEach(function(y) { stringCheck(y); });
-      }
-    },
-    name: {
-      required: true,
-      check: nonEmptyStringCheck
-    },
-    shortname: {
-      required: false
-    },
-    resizable: {
-      required: false,
-      check: booleanCheck
-    },
-    vendor: {
-      required: true,
-      check: nonEmptyStringCheck
-    },
-    enableSystemPrivileges: {
-      required: false,
-      check: booleanCheck
-    },
-    version: {
-      required: true,
-      check: function(x) {
-        if (typeof(x) !== 'string' || !x.match(/^[0-9]+\.[0-9]+$/)) errorThrow();
-      }
-    },
-  };
-
-  var manfAliases = {
-    menubars: "menubar"
-  }
-
-  // a function to extract nested values given an object and array of property names
-  function extractValue(obj, props) {
-    return ((props.length === 0) ? obj : extractValue(obj[props[0]], props.slice(1)));
-  }
-
-  // a function that will validate properties of a manfiest using the
-  // manfProps data structure above.
-  // returns a normalized version of the appinfo, throws upon
-  // detection of invalid properties
-  function validateAppinfoProperties(manf) {
-    var normalizedManf = {};
-
-    for (var prop in manf) {
-      if (!manf.hasOwnProperty(prop)) continue;
-      if (!(prop in manfProps)) errorThrow('unsupported property', prop);
-      var pSpec = manfProps[prop];
-      if (typeof pSpec.check === 'function') {
-        try {
-          pSpec.check(manf[prop]);
-        } catch (e) {
-          e.path.unshift(prop);
-          if (!e.msg) e.msg = 'invalid value: ' + extractValue(manf, e.path);
-          throw e;
-        }
-      }
-      if (typeof pSpec.normalize === 'function') {
-        normalizedManf[prop] = pSpec.normalize(manf[prop]);
-        // special case.  a normalization function can remove properties by
-        // returning undefined.
-        if (normalizedManf[prop] === undefined) delete normalizedManf[prop];
-      } else {
-        normalizedManf[prop] = manf[prop];
-      }
-    }
-    return normalizedManf;
-  }
+  if (!manf)
+    errorThrow("null");
 
   // handle aliases
-  for (var alias in manfAliases) {
-    if (manf[alias] !== undefined) {
-      manf[manfAliases[alias]] = manf[alias];
-      delete manf[alias];
-    }
+  for (let alias of Iterator(manfAliases)) {
+    if (!manf[alias])
+      continue;
+    manf[manfAliases[alias]] = manf[alias];
+    delete manf[alias];
   }
 
   // iterate through required properties, and verify they're present
-  for (var prop in manfProps) {
-    if (!manfProps.hasOwnProperty(prop) || !manfProps[prop].required) continue;
-    if (!(prop in manf)) {
-      errorThrow('missing "' + prop + '" property');
-    }
+  for (let [prop, desc] of Iterator(manfProps)) {
+    if (!desc.required)
+      continue;
+    if (!(prop in manf))
+      errorThrow("missing '" + prop + "' property");
   }
 
   return validateAppinfoProperties(manf, false);
@@ -210,12 +217,7 @@ function validate(manf) {
  *
  * This module give you conveinent read access to this file
  */
-
-const appPaths = require('app-paths');
-const file = require('file');
-const path = require('path');
-
-var appInfoContents = undefined;
+let appInfoContents = null;
 
 /**
  * @prop contents
@@ -227,11 +229,11 @@ var appInfoContents = undefined;
 module.exports = {
   get contents() {
     if (!appInfoContents) {
-      var contents = file.read(path.join(appPaths.appCodeDir, 'appinfo.json'));
+      let contents = Fs.readFileSync(Path.join(AppPaths.appCodeDir, "appinfo.json"), "utf8");
       try {
         appInfoContents = JSON.parse(contents);
       } catch(e) {
-        throw "syntax error in JSON: " + e.toString();
+        throw new Error("syntax error in JSON: " + e.toString());
       }
       appInfoContents = validate(appInfoContents);
     }
