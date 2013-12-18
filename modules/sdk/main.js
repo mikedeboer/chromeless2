@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
  *   Marcio Galli <mgalli@mgalli.com>
+ *   Mike de Boer <mdeboer@mozilla.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -45,7 +46,13 @@ const {Ci, Cc, Cr, Cu} = require("chrome");
 const path = require("path");
 const appinfo = require("appinfo");
 const AppPaths = require("app-paths");
-const Process = require("process");
+const process = require("process");
+const Buffer = require("sdk/io/buffer");
+const {override} = require("api-utils");
+const {setTimeout, clearTimeout, setInterval, clearInterval} = require("sdk/timers");
+
+for (let name of ["process", "Buffer", "setTimeout", "clearTimeout", "setInterval", "clearInterval"])
+  global[name] = this[name];
 
 let appWindow = null;
 
@@ -183,8 +190,7 @@ exports.main = function main(options, testCallbacks) {
     height: 600,
     resizable: ai.resizable ? true : false,
     menubar: ai.menubar ? true : false,
-    injectProps : {
-      process: Process,
+    injectProps : override({
       require: requireForBrowser,
       exit: function() {
         console.log("window.exit() called...");
@@ -192,7 +198,7 @@ exports.main = function main(options, testCallbacks) {
         // This is for tests framework to test the window exists or not:
         appWindow = null;
       }
-    }
+    }, global)
   }, testCallbacks);
 };
 

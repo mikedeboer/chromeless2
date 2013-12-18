@@ -21,6 +21,7 @@
   },
   "mappings": {
     "path": "sdk/fs/path",
-    "fs": "sdk/io/fs"
+    "fs": "sdk/io/fs",
+    "net": "sdk/io/net"
   }
 }

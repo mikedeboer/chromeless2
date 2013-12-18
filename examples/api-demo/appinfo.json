@@ -5,5 +5,7 @@
   "developer_email": "unknown@unknown.com",
   "module_dirs": [],
   "version": "0.1",
-  "enableSystemPrivileges": true
+  "enableSystemPrivileges": true,
+  "resizable": true,
+  "menubar": true
 }
