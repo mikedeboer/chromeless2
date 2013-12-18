@@ -61,7 +61,7 @@ const VALID_TYPES = [
   "undefined"
 ];
 
-let descriptor = exports.descriptor = function descriptor(object) {
+const descriptor = exports.descriptor = function descriptor(object) {
   let value = {};
   Object.getOwnPropertyNames(object).forEach(function(name) {
     value[name] = Object.getOwnPropertyDescriptor(object, name)
@@ -69,7 +69,7 @@ let descriptor = exports.descriptor = function descriptor(object) {
   return value;
 };
 
-let override = exports.override = function override(target, source) {
+const override = exports.override = function override(target, source) {
   let properties = descriptor(target)
   let extension = descriptor(source || {})
   Object.getOwnPropertyNames(extension).forEach(function(name) {
@@ -110,7 +110,7 @@ exports.publicConstructor = function publicConstructor(privateCtor) {
   return PublicCtor;
 };
 
-exports.Iterator = function Iterator(obj) {
+const Iterator = exports.Iterator = function Iterator(obj) {
   for (let key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key))
       yield [key, obj[key]];

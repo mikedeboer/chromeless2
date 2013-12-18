@@ -35,6 +35,7 @@
 const {Ci, Cu} = require("chrome");
 const {env: Env} = require("sdk/system/environment");
 const {Iterator} = require("api-utils");
+const {setImmediate} = require("sdk/timers");
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://gre/modules/Services.jsm");
@@ -170,7 +171,7 @@ module.exports = Object.freeze({
   nextTick: function(callback) {
     if (!callback)
       return;
-    Services.tm.mainThread.dispatch(callback, Ci.nsIThread.DISPATCH_NORMAL);
+    setImmediate(callback);
   },
 
   get maxTickDepth() {
