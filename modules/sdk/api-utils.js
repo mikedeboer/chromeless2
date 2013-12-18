@@ -88,28 +88,6 @@ exports.getHiddenHTMLWindow = function getHiddenHTMLWindow() {
 #endif
 };
 
-/**
- * Returns a function C that creates instances of privateCtor.  C may be called
- * with or without the new keyword.  The prototype of each instance returned
- * from C is C.prototype, and C.prototype is an object whose prototype is
- * privateCtor.prototype.  Instances returned from C will therefore be instances
- * of both C and privateCtor.  Additionally, the constructor of each instance
- * returned from C is C.
- *
- * @param  privateCtor
- *         A constructor.
- * @return A function that makes new instances of privateCtor.
- */
-exports.publicConstructor = function publicConstructor(privateCtor) {
-  function PublicCtor() {
-    let obj = override({ constructor: PublicCtor }, PublicCtor.prototype );
-    privateCtor.apply(obj, arguments);
-    return obj;
-  }
-  PublicCtor.prototype = override({}, privateCtor.prototype);
-  return PublicCtor;
-};
-
 const Iterator = exports.Iterator = function Iterator(obj) {
   for (let key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key))
