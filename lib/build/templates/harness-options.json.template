@@ -24,6 +24,8 @@
     "fs": "sdk/io/fs",
     "net": "sdk/io/net",
     "timers": "sdk/timers",
-    "stream": "sdk/io/stream"
+    "stream": "sdk/io/stream",
+    "child_process": "sdk/system/child-process",
+    "subprocess/index": "sdk/subprocess/index"
   }
 }

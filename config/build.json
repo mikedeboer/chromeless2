@@ -12,7 +12,8 @@
                   "private-browsing", "tab", "tabs", "test", "ui",
                   "view", "window", "windows", "worker"],
       "include": [
-        ["addon-sdk", "lib", "toolkit", "loader.js"]
+        ["addon-sdk", "lib", "toolkit", "loader.js"],
+        ["addon-sdk", "lib", "subprocess"]
       ],
       "preprocess": []
     },
