@@ -23,7 +23,8 @@
     "rimraf": "~2.2.2",
     "ncp": "~0.4.2",
     "async": "~0.2.9",
-    "uuid": "~1.4.1"
+    "uuid": "~1.4.1",
+    "optimist": "~0.6.0"
   },
   "scripts": {},
   "licenses": [

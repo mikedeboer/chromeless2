@@ -7,6 +7,7 @@
 
 var Path = require("path");
 var Fs = require("fs");
+var Async = require("async");
 var Multi = require("multimeter");
 
 var Util = require("./lib/util");
@@ -14,11 +15,37 @@ var Mozfetcher = require("./lib/mozfetcher");
 var Moztarball = require("./lib/moztarball");
 var Build = require("./lib/build");
 
-var multi = Multi(process);
+var Optimist = require("optimist");
+var argv = Optimist
+  .wrap(80)
+  .usage("Build, run or package an application using the latest Mozilla " +
+         "technologies.\nUsage: $0 /path/to/app")
+  .alias("b", "build")
+  .default("b", true)
+  .describe("b", "Build an app for the current OS. Simplest option, as this " +
+                 "will not run or create a distributable package.")
+  .alias("r", "run")
+  .describe("r", "Build & run an app for the current OS. This option will not " +
+                 "create a distributable package.")
+  .alias("p", "package")
+  .describe("p", "Build & package an app for the current OS.")
+  .describe("os", "Operating System to build an app for. Possible options are: " +
+                  "'windows', 'linux' and 'osx'")
+  .default("os", Util.getPlatform())
+  .alias("h", "help")
+  .describe("h", "Show this help message.")
+  .alias("v", "verbose")
+  .describe("v", "Show verbose logging information.")
+  .boolean(["b", "r", "p", "h"])
+  .argv;
+
+// Thoroughly sanitize the CLI arguments:
+argv = Util.sanitizeArguments(argv);
 
 // Exit handler
 function onExit(ex) {
-  Util.log("Exiting...");
+  if (argv.verbose)
+    Util.log("Exiting...");
   if (multi)
     multi.destroy();
   if (ex)
@@ -27,98 +54,83 @@ function onExit(ex) {
 process.on("exit", onExit);
 process.on("UncaughtException", onExit);
 
+if (argv.help) {
+  console.log(Optimist.help());
+  process.exit();
+}
+
 function exitWithError(err, code) {
   if (err)
     Util.log(err, "error");
   process.exit(code || 1);
 }
 
-// A small script to invoke cfx from the jetpack platform with proper arguments.
-// accepts a single argument on the command line which is the path to the
-// "entry point HTML" - that which should be used as the app's UI.
+var multi = Multi(process);
 
-var cwd = process.cwd();
+// set the "build directory", where we'll output built artifacts, download
+// xulrunner, etc.
+var buildDir = Path.join(process.cwd(), "build");
 
-// set the "build directory", where we'll output built artifacts, download xulrunner,
-// etc.
-var buildDir = Path.join(cwd, "build");
+// Each app will be process for each OS specified through the command line.
+// First we'll do a basic check if the app directories exist:
+argv.apps.forEach(function(appPath) {
+  // Throw an error message if we can't figure out what html file is the app's
+  // HTML entry point
+  if (!Fs.existsSync(appPath))
+    exitWithError("Can't find app HTML (tried '" + appPath + "')");
+});
 
-var executionMode = "run";
+// Then we'll check if the necessary xulrunner is present for all OSes to build:
+Async.eachSeries(argv.os,
+  function(os, nextOS) {
+    var fetcher = new Mozfetcher(buildDir, multi, os.platform, os.arch);
+    // Tack path to the xulrunner executable on `os`, to reuse later in run()!
+    os.xulrunnerPath = fetcher.getXulrunnerPath();
 
-// TODO: implement better arg parsing and CLI help msg.
-var appToLaunch = null
-var argv = [].concat(process.argv);
-argv.shift();
-var argc = argv.length;
-if (argc > 1 && Build.executionModes[argv[1]]) {
-  executionMode = argv[1];
-  switch (argv[1]) {
-    case "package":
-      Util.log("Packaging a xulrunner application (directory) into build/");
-      if (arc > 2)
-        appToLaunch = Util.findAppHTML(argv[2]);
-      break;
-    case "appify":
-      Util.log("Generating a standalone, redistributable, application");
-      if (argc > 2)
-        appToLaunch = Util.findAppHTML(argv[2]);
-      break;
-    case "docs":
-      Util.log("Generating documentation");
-      break;
-    case "test":
-      Util.log("Running Chromeless tests");
-      break;
-    default:
-      appToLaunch = Util.findAppHTML(argv[2]);
-      break;
-  }
-}
-
-if (!appToLaunch)
-  appToLaunch = Util.findAppHTML(Path.join(cwd, "examples", "api-demo", "index.html"));
-
-// Throw an error message if we can't figure out what html file is the app's
-// HTML entry point
-if (!Fs.existsSync(appToLaunch))
-  exitWithError("Can't find app HTML (tried '" + appToLaunch + "')");
-
-var fetcher = new Mozfetcher(buildDir, multi);
-fetcher.fetchIfNeeded(function(err, tarball) {
-  if (err)
-    exitWithError(err);
-
-  if (tarball) {
-    new Moztarball(buildDir, multi).unpack(tarball || fetcher.getArchivePath(), function(err) {
+    fetcher.fetchIfNeeded(function(err, tarball) {
       if (err)
-        exitWithError(err);
+        nextOS(err);
 
-      // If after all that we still think we need to fetch the thing, that means
-      // unpacked bits don't match expected signatures. Safest to purge them
-      // from disk and/or refuse to run.
-      fetcher.needsFetch(function(err, needsFetch, msg) {
-        if (!err && needsFetch) {
-          err = "Signature mismatch in unpacked xulrunner contents.  Eep!\n" +
-                (msg || "");
-        }
-        if (err)
-          exitWithError(err);
-        run();
-      });
+      if (tarball) {
+        new Moztarball(buildDir, multi).unpack(tarball || fetcher.getArchivePath(), function(err) {
+          if (err)
+            nextOS(err);
+
+          // If after all that we still think we need to fetch the thing, that means
+          // unpacked bits don't match expected signatures. Safest to purge them
+          // from disk and/or refuse to run.
+          fetcher.needsFetch(function(err, needsFetch, msg) {
+            if (!err && needsFetch) {
+              err = "Signature mismatch in unpacked xulrunner contents.  Eep!\n" +
+                    (msg || "");
+            }
+            nextOS(err);
+          });
+        });
+      } else {
+        nextOS();
+      }
     });
-  } else {
+  },
+  function(err) {
+    if (err)
+      exitWithError(err);
     run();
-  }
+  });
 
-  function run() {
-    // DONE! Alright, now can finally start doing something interesting...
-    var xulrunner = fetcher.getXulrunnerPath();
-
-    // TODO: make this dependent on the CLI flags.
-    Build.appify(executionMode, xulrunner, appToLaunch, buildDir, multi, function(err) {
+function run() {
+  // DONE! Alright, now we can finally start doing something interesting...
+  Async.eachSeries(argv.apps,
+    function(app, nextApp) {
+      Async.eachSeries(argv.os,
+        function(os, nextOS) {
+          Build.appify(os, app, buildDir, multi, argv.verbose, nextOS);
+        },
+        nextApp);
+    },
+    function(err) {
       if (err)
         exitWithError(err);
       process.exit();
     });
-  }
-});
+}
