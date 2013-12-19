@@ -22,6 +22,8 @@
   "mappings": {
     "path": "sdk/fs/path",
     "fs": "sdk/io/fs",
-    "net": "sdk/io/net"
+    "net": "sdk/io/net",
+    "timers": "sdk/timers",
+    "stream": "sdk/io/stream"
   }
 }

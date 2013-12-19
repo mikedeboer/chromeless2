@@ -196,6 +196,45 @@
           addOutputLine("Password: " + item.password);
         });
       }
+
+      function udpPingPong() {
+        var dgram = require("dgram");
+        var sock1 = new dgram.Socket();
+        var sock2 = dgram.createSocket();
+
+        sock1.bind(12444, "localhost", function() {
+          console.log("SOCK1 READY!");
+        });
+        sock1.on("message", function(msg, rinfo) {
+          console.log("SOCK1", msg);
+          // console.dir(rinfo);
+          if (msg.toString() == "PING") {
+            var msg = new Buffer("PONG");
+            sock1.send(msg, 0, msg.length, rinfo.port, rinfo.host);
+          }
+        });
+
+        sock2.on("listening", function() {
+          console.log("SOCK2 READY!");
+          var msg = new Buffer("PING");
+          sock2.send(msg, 0, msg.length, 12444, "localhost");
+          sock2.on("close", function() {
+            console.log("SOCK2 closed.");
+          });
+        });
+        sock2.bind(12445, "localhost");
+        sock2.on("message", function(msg, rinfo) {
+          console.log("SOCK2", msg);
+          // console.dir(rinfo);
+        });
+      }
+
+      function otherAPIs() {
+        var url = "http://user:pass@example.com:8000/foo/bar?baz=quux#frag";
+        var parsed = require("url").parse(url, true);
+        console.dir(parsed);
+        addOutputLine("require('url').parse: " + JSON.stringify(parsed, null, 2));
+      }
     </script>
   </head>
   <body onload="start()">
@@ -214,6 +253,8 @@
           <button onclick="toggleFullscreen()">Toggle Fullscreen</button>
           <button onclick="addToKeychain()">Add to Keychain</button>
           <button onclick="getFromKeychain()">Get from Keychain</button>
+          <button onclick="udpPingPong()">UDP ping-pong</button>
+          <button onclick="otherAPIs()">Show off APIs</button>
         </p>
         <button onclick="clearOutput()">Clear</button>
         <pre id="outputArea"></pre>

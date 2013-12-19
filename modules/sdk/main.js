@@ -47,7 +47,7 @@ const path = require("path");
 const appinfo = require("appinfo");
 const AppPaths = require("app-paths");
 const process = require("process");
-const Buffer = require("sdk/io/buffer");
+const {Buffer} = require("sdk/io/buffer");
 const {override} = require("api-utils");
 const {setTimeout, clearTimeout, setInterval, clearInterval} = require("sdk/timers");
 
