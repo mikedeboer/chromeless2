@@ -127,8 +127,8 @@ Window.prototype = {
       case "DOMContentLoaded":
         if (event.target == this._window.document) {
           // update window title
-          if (kAppInfo && kAppInfo.name) {
-            this._window.document.title = kAppInfo.name;
+          if (kAppInfo && kAppInfo.title) {
+            this._window.document.title = kAppInfo.title;
             console.log(this._window.document.title);
           }
 
