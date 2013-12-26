@@ -16,9 +16,11 @@ var Moztarball = require("./lib/moztarball");
 var Build = require("./lib/build");
 
 var Optimist = require("optimist");
+var Manifest = JSON.parse(Fs.readFileSync(Path.join(__dirname, "package.json"), "utf8"));
 var argv = Optimist
   .wrap(80)
-  .usage("Build, run or package an application using the latest Mozilla " +
+  .usage("Chromeless v" + Manifest.version + "\n" +
+         "Build, run or package an application using the latest Mozilla " +
          "technologies.\nUsage: $0 /path/to/app")
   .alias("b", "build")
   .default("b", true)
