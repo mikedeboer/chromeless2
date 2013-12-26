@@ -108,7 +108,7 @@ const manfProps = {
     required: false,
     check: booleanCheck
   },
-  module_dirs: {
+  dependencies: {
     required: false,
     check: function(x) {
       if (!Array.isArray(x))
@@ -120,7 +120,7 @@ const manfProps = {
     required: true,
     check: nonEmptyStringCheck
   },
-  shortname: {
+  title: {
     required: false
   },
   resizable: {
@@ -228,10 +228,10 @@ let appInfoContents = null;
  */
 module.exports = {
   get contents() {
-    if (!packageContents) {
+    if (!appInfoContents) {
       let contents = Fs.readFileSync(Path.join(AppPaths.appCodeDir, "package.json"), "utf8");
       try {
-        packageContents = JSON.parse(contents);
+        appInfoContents = JSON.parse(contents);
       } catch(e) {
         throw new Error("syntax error in JSON: " + e.toString());
       }
