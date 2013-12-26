@@ -130,7 +130,7 @@ function requireForBrowser(moduleName, context = this) {
 }
 
 exports.main = function main(options, testCallbacks) {
-  // Access appinfo.json contents for startup parameters
+  // Access package.json contents for startup parameters
   const ai = appinfo.contents;
 
   let call = options.staticArgs;

@@ -185,7 +185,7 @@ function validateAppinfoProperties(manf) {
   return normalizedManf;
 }
 
-// validate a javascript representation of an appinfo.json, throw nice error objects
+// validate a javascript representation of an package.json, throw nice error objects
 // if something ain't right
 function validate(manf) {
   // Validate and clean the request
@@ -212,7 +212,7 @@ function validate(manf) {
 };
 
 /**
- * [`appinfo.json`](#guide/startup-parameters) is a small file that contains
+ * [`package.json`](#guide/startup-parameters) is a small file that contains
  * various application parameters used in startup and packaging.
  *
  * This module give you conveinent read access to this file
@@ -221,17 +221,17 @@ let appInfoContents = null;
 
 /**
  * @prop contents
- * (read-only) The contents of the `appinfo.json` file as a javascript object
- * @throws upon access if the appinfo.json file is malformed (this should happen
+ * (read-only) The contents of the `package.json` file as a javascript object
+ * @throws upon access if the package.json file is malformed (this should happen
  * at application startup, and never during runtime.  In application code this
  * exception can be safely ignored).
  */
 module.exports = {
   get contents() {
-    if (!appInfoContents) {
-      let contents = Fs.readFileSync(Path.join(AppPaths.appCodeDir, "appinfo.json"), "utf8");
+    if (!packageContents) {
+      let contents = Fs.readFileSync(Path.join(AppPaths.appCodeDir, "package.json"), "utf8");
       try {
-        appInfoContents = JSON.parse(contents);
+        packageContents = JSON.parse(contents);
       } catch(e) {
         throw new Error("syntax error in JSON: " + e.toString());
       }

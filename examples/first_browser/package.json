@@ -1,7 +1,8 @@
 {
   "build_id": "20131009151406",
   "vendor": "Unknown",
-  "name": "My First Browser",
+  "name": "first-browser",
+  "title": "My First Browser",
   "developer_email": "unknown@unknown.com",
   "module_dirs": [],
   "version": "0.1",
