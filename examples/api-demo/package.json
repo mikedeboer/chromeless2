@@ -8,5 +8,8 @@
   "version": "0.1.0",
   "enableSystemPrivileges": true,
   "resizable": true,
-  "menubar": true
+  "menubar": true,
+  "appicon": {
+    "512": "appicon.png"
+  }
 }

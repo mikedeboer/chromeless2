@@ -203,10 +203,10 @@
         var sock2 = dgram.createSocket();
 
         sock1.bind(12444, "localhost", function() {
-          console.log("SOCK1 READY!");
+          addOutputLine("SOCK1 READY!");
         });
         sock1.on("message", function(msg, rinfo) {
-          console.log("SOCK1", msg);
+          addOutputLine("SOCK1: received '" + msg + "'");
           // console.dir(rinfo);
           if (msg.toString() == "PING") {
             var msg = new Buffer("PONG");
@@ -215,16 +215,16 @@
         });
 
         sock2.on("listening", function() {
-          console.log("SOCK2 READY!");
+          addOutputLine("SOCK2 READY!");
           var msg = new Buffer("PING");
           sock2.send(msg, 0, msg.length, 12444, "localhost");
           sock2.on("close", function() {
-            console.log("SOCK2 closed.");
+            addOutputLine("SOCK2 closed.");
           });
         });
         sock2.bind(12445, "localhost");
         sock2.on("message", function(msg, rinfo) {
-          console.log("SOCK2", msg);
+          addOutputLine("SOCK2: received '" + msg + "'");
           // console.dir(rinfo);
         });
       }

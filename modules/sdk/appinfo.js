@@ -46,9 +46,10 @@ const errorThrow = function(msg, path) {
     msg: msg,
     path: (path ? path : []),
     toString: function () {
+      var pfx = "[appinfo] ";
       if (this.path && this.path.length)
-        return "(" + Path.join.apply(Path, this.path) + ") " + this.msg;
-      return this.msg;
+        return pfx + this.msg + " (" + Path.join.apply(Path, this.path) + ")";
+      return pfx + this.msg;
     }
   };
 };
@@ -121,6 +122,9 @@ const manfProps = {
     check: nonEmptyStringCheck
   },
   title: {
+    required: false
+  },
+  appicon: {
     required: false
   },
   resizable: {
