@@ -38,27 +38,27 @@ This "main app HTML" is basically a normal webpage, but with several important d
 ## Prerequisites
 
 * OSX 10.5 and later, Windows XP and later, or probably a modern versions of linux (32 or 64 bit).
-* Python 2.5 - 2.7 (3 is not supported); Python 2.6 or 2.7 are recommended (testing isn't as thorough with 2.5).
+* NodeJS 0.10.x or higher.
 
 ## Getting Started
 
-The top level `chromeless` python script is capable of several things:
+The top level `chromeless` NodeJS script is capable of several things:
 
-  * running a browser when provided a path to 'browser HTML'
-  * packaging a browser as a xulrunner package, or a standalone exectuable (not yet implemented)
+  * running an app when provided a path to 'app HTML'
+  * packaging aan app as a xulrunner package, or a standalone exectuable (not yet implemented)
   * running unit tests (not yet implemented)
   * generating static documentation for all current APIs (not yet implemented)
 
 To get started, you should clone this repository (or download a versioned snapshot) and run:
 
-    (win32) C:\xxx\chromeless> chromeless
-    (osx)   $ ./chromeless
+    (win32) C:\xxx\chromeless> chromeless -r
+    (osx)   $ ./chromeless -r
 
-By default, the HTML files in `examples/first_browser` will be executed, and you'll see a very
-simple browser based on them.  You may also specify an alternate browser HTML on the command line:
+By default, the HTML files in `examples/api-demo` will be executed, and you'll see a very
+simple browser based on them.  You may also specify an alternate app HTML on the command line:
 
-    (win32) C:\xxx\chromeless> chromeless examples\webgl
-    (osx)   $ ./chromeless examples/webgl
+    (win32) C:\xxx\chromeless> chromeless -r examples\webgl
+    (osx)   $ ./chromeless -r examples/webgl
 
 From here, you can inspect the implementation of any of these samples, copy, modify and explore.
 
@@ -66,15 +66,20 @@ For deployment or to share your application, you can use chromeless to generate 
 application folder, that anyone on a supported platform can run.  Output will be placed
 in the build/ directory:
 
-    (win32) C:\xxx\chromeless> chromeless appify examples\webgl
-    (osx)   $ ./chromeless appify examples/webgl
+    (win32) C:\xxx\chromeless> chromeless examples\webgl
+    (osx)   $ ./chromeless examples/webgl
 
 Finally, it's possible to generate a "XULRunner application", which is a folder that is much
 smaller than a standalone application, but can be run under (a specific version of) xulrunner.
 Again, the output will be placed in the build/ directory:
 
-    (win32) C:\xxx\chromeless> chromeless  package examples\webgl
-    (osx)   $ ./chromeless package examples/webgl 
+    (win32) C:\xxx\chromeless> chromeless -p examples\webgl
+    (osx)   $ ./chromeless -p examples/webgl
+
+For more commandline options, please run the following command for more information:
+
+    (win32) C:\xxx\chromeless> chromeless -h
+    (osx)   $ ./chromeless -h
 
 ## Documentation and Additional Information
 
@@ -83,10 +88,8 @@ To generate a local API documentation, use:
     (win32) C:\xxx\chromeless> chromeless docs
     (osx)   $ ./chromeless docs
 
-You may also check the [Chromeless documentation online](http://mozilla.github.com/chromeless), plus 
-inline examples can also be helpful. You can always find us on irc in `#labs` 
-at `irc.mozilla.org`, or get help or discuss this project on our mailing
- list: `mozilla-labs@googlegroups.com`
+You can always find us on irc in `#labs` at `irc.mozilla.org`, or get help or 
+discuss this project on our mailing list: `mozilla-labs@googlegroups.com`
 
 ## Sub-projects for Tests 
 
@@ -95,22 +98,6 @@ apps under tests/ directory that have the test-app.js file in it:
 
     (win32) C:\xxx\chromeless> chromeless tests
     (osx)   $ ./chromeless tests
-
-## Gallery 
-
-An early version of a developer's gallery is now part of this git repository using 
-git sub-modules. You may use Chromeless to launch or package these examples that 
-provided in the gallery/ directory. In order to pull the projects from the gallery/ 
-, you will need to initialize and update using git submodule. Example: 
-
-    (linux) git submodule init ./gallery/simple-text-editor
-    (win32) git submodule init .\gallery\simple-text-editor
-
-    (linux) git submodule update ./gallery/simple-text-editor
-    (win32) git submodule update .\gallery\simple-text-editor
-
-    (win32) C:\xxx\chromeless> chromeless .\gallery\simple-text-editor
-    (osx)   $ ./chromeless ./gallery/simple-text-editor
 
 ## Notes and Known Issues
 
