@@ -13,6 +13,7 @@
     under the MPL 1.1, GPL 2.0 and LGPL 2.1.
 
 ## Artwork
+##### Do NOT redistribute and/ or use in production without prior written consent of the original artist.
 
   * The default app icon was made by Thomas Gladdines (Seahorsepip) and can be
     found at http://fav.me/d33ssza.
