@@ -234,6 +234,22 @@
         var parsed = require("url").parse(url, true);
         console.dir(parsed);
         addOutputLine("require('url').parse: " + JSON.stringify(parsed, null, 2));
+
+        var Async = require("async");
+        var start = Date.now();
+        var time = start;
+        var timeout = 1500;
+        addOutputLine("Using a NodeJS module:");
+        Async.eachSeries(["uno", "dos", "tres"], function(which, next) {
+          setTimeout(function() {
+            var now = Date.now();
+            addOutputLine("Async.eachSeries: " + which + ", time passed: " + (now - time) + "ms.");
+            time = now;
+            next();
+          }, timeout);
+        }, function(err) {
+          addOutputLine("Async.eachSeries: done! Total time passed: " + (Date.now() - start) + "ms.");
+        });
       }
     </script>
   </head>

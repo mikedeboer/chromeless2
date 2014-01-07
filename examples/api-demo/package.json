@@ -4,7 +4,9 @@
   "name": "api-demo",
   "title": "Chromeless API Demo",
   "developer_email": "unknown@unknown.com",
-  "dependencies": {},
+  "dependencies": {
+    "async": "~0.2.9"
+  },
   "version": "0.1.0",
   "enableSystemPrivileges": true,
   "resizable": true,
