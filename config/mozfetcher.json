@@ -1,19 +1,19 @@
 {
   "linux": {
     "x64": {
-      "url": "http://releases.mozilla.org/pub/mozilla.org/xulrunner/releases/6.0.2/runtimes/xulrunner-6.0.2.en-US.linux-x86_64.tar.bz2",
-      "md5": "a1e98013cbb4d9685461465e09b3c7c7",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.linux-x86_64.tar.bz2",
+      "md5": "8d793fc55a52e27c75964c2c518d2e98",
       "bin": {
         "path": "xulrunner/xulrunner",
-        "sig": "e473d9a27a10b9bf1ffb1bd8a3e6d668"
+        "sig": "73ad531bb7c8aed00e7ee7e751667356"
       }
     },
     "x32": {
-      "url": "http://releases.mozilla.org/pub/mozilla.org/xulrunner/releases/6.0.2/runtimes/xulrunner-6.0.2.en-US.linux-i686.tar.bz2",
-      "md5": "b348164d69ab9d1b226e98a4893029f2",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.linux-i686.tar.bz2",
+      "md5": "82940cdb2176e0dfe25f7edfb0da34c7",
       "bin": {
         "path": "xulrunner/xulrunner",
-        "sig": "e473d9a27a10b9bf1ffb1bd8a3e6d668"
+        "sig": "360d2de47a9e95096d2d53e6c784cd49"
       }
     }
   },
