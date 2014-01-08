@@ -51,8 +51,10 @@ function onExit(ex) {
     Util.log("Exiting...");
   if (multi)
     multi.destroy();
-  if (ex)
+  if (ex) {
+    console.trace();
     throw ex;
+  }
 }
 process.on("exit", onExit);
 process.on("UncaughtException", onExit);
