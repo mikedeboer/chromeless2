@@ -9,6 +9,7 @@ var Path = require("path");
 var Fs = require("fs");
 var Async = require("async");
 var Multi = require("multimeter");
+var Mkdirp = require("mkdirp");
 
 var Util = require("./lib/util");
 var Mozfetcher = require("./lib/mozfetcher");
@@ -72,53 +73,58 @@ var multi = Multi(process);
 // set the "build directory", where we'll output built artifacts, download
 // xulrunner, etc.
 var buildDir = Path.join(process.cwd(), "build");
+// Ensure that the 'build' directory is present.
+Mkdirp(buildDir, function(err) {
+  if (err)
+    exitWithError(err);
 
-// Each app will be process for each OS specified through the command line.
-// First we'll do a basic check if the app directories exist:
-argv.apps.forEach(function(appPath) {
-  // Throw an error message if we can't figure out what html file is the app's
-  // HTML entry point
-  if (!Fs.existsSync(appPath))
-    exitWithError("Can't find app HTML (tried '" + appPath + "')");
-});
-
-// Then we'll check if the necessary xulrunner is present for all OSes to build:
-Async.eachSeries(argv.os,
-  function(os, nextOS) {
-    var fetcher = new Mozfetcher(buildDir, multi, os.platform, os.arch);
-    // Tack path to the xulrunner executable on `os`, to reuse later in run()!
-    os.xulrunnerPath = fetcher.getXulrunnerPath();
-
-    fetcher.fetchIfNeeded(function(err, tarball) {
-      if (err)
-        nextOS(err);
-
-      if (tarball) {
-        new Moztarball(buildDir, multi).unpack(tarball || fetcher.getArchivePath(), function(err) {
-          if (err)
-            nextOS(err);
-
-          // If after all that we still think we need to fetch the thing, that means
-          // unpacked bits don't match expected signatures. Safest to purge them
-          // from disk and/or refuse to run.
-          fetcher.needsFetch(function(err, needsFetch, msg) {
-            if (!err && needsFetch) {
-              err = "Signature mismatch in unpacked xulrunner contents.  Eep!\n" +
-                    (msg || "");
-            }
-            nextOS(err);
-          });
-        });
-      } else {
-        nextOS();
-      }
-    });
-  },
-  function(err) {
-    if (err)
-      exitWithError(err);
-    run();
+  // Each app will be process for each OS specified through the command line.
+  // First we'll do a basic check if the app directories exist:
+  argv.apps.forEach(function(appPath) {
+    // Throw an error message if we can't figure out what html file is the app's
+    // HTML entry point
+    if (!Fs.existsSync(appPath))
+      exitWithError("Can't find app HTML (tried '" + appPath + "')");
   });
+
+  // Then we'll check if the necessary xulrunner is present for all OSes to build:
+  Async.eachSeries(argv.os,
+    function(os, nextOS) {
+      var fetcher = new Mozfetcher(buildDir, multi, os.platform, os.arch);
+      // Tack path to the xulrunner executable on `os`, to reuse later in run()!
+      os.xulrunnerPath = fetcher.getXulrunnerPath();
+
+      fetcher.fetchIfNeeded(function(err, tarball) {
+        if (err)
+          nextOS(err);
+
+        if (tarball) {
+          new Moztarball(buildDir, multi).unpack(tarball || fetcher.getArchivePath(), function(err) {
+            if (err)
+              nextOS(err);
+
+            // If after all that we still think we need to fetch the thing, that means
+            // unpacked bits don't match expected signatures. Safest to purge them
+            // from disk and/or refuse to run.
+            fetcher.needsFetch(function(err, needsFetch, msg) {
+              if (!err && needsFetch) {
+                err = "Signature mismatch in unpacked xulrunner contents.  Eep!\n" +
+                      (msg || "");
+              }
+              nextOS(err);
+            });
+          });
+        } else {
+          nextOS();
+        }
+      });
+    },
+    function(err) {
+      if (err)
+        exitWithError(err);
+      run();
+    });
+});
 
 function run() {
   // DONE! Alright, now we can finally start doing something interesting...
