@@ -6,6 +6,9 @@ component {5f2c73b0-406a-4287-932d-a5e1af4ccb13} components/cli.js
 contract @mozilla.org/commandlinehandler/general-startup;1?type=chromeless {5f2c73b0-406a-4287-932d-a5e1af4ccb13}
 category command-line-handler m-chromeless @mozilla.org/commandlinehandler/general-startup;1?type=chromeless
 
+component {b6f6d8cf-ef2b-448b-a886-f3c991f8080a} components/app-glue.js
+contract @mozilla.org/content-permission/prompt;1 {b6f6d8cf-ef2b-448b-a886-f3c991f8080a}
+
 resource app-bootstrap components/
 
 content chromeless chromeless/content/
