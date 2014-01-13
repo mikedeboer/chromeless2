@@ -56,6 +56,9 @@ for (let name of ["process", "Buffer", "setTimeout", "clearTimeout", "setInterva
 
 let appWindow = null;
 
+const kDefaultWindowWidth = 800;
+const kDefaultWindowHeight = 600;
+
 // These functions are used from the test application.
 module.exports = exports = {
   get AppWindow() {
@@ -186,8 +189,8 @@ exports.main = function main(options, testCallbacks) {
   // width and height.
   appWindow = new Window({
     url: startPage,
-    width: 800,
-    height: 600,
+    width: ai.width || kDefaultWindowWidth,
+    height: ai.height || kDefaultWindowHeight,
     resizable: ai.resizable ? true : false,
     menubar: ai.menubar ? true : false,
     injectProps : override({

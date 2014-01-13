@@ -83,6 +83,7 @@ const notImplementedYet = function() {
 };
 
 module.exports = Object.freeze({
+  chromeless: true,
   get argv() {
     let ret;
     GetArgv(argv => ret = argv);

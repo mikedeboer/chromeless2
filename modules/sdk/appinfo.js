@@ -131,6 +131,14 @@ const manfProps = {
     required: false,
     check: booleanCheck
   },
+  width: {
+    required: false,
+    check: isInteger
+  },
+  height: {
+    required: false,
+    check: isInteger
+  },
   vendor: {
     required: true,
     check: nonEmptyStringCheck
