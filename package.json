@@ -4,10 +4,7 @@
   },
   "name": "chromeless2",
   "contributors": [
-    {
-      "name": "Mike de Boer",
-      "email": "mdeboer@mozilla.com"
-    }
+    "Mike de Boer <mdeboer@mozilla.com>"
   ],
   "author": "Mike de Boer <mdeboer@mozilla.com>",
   "repository": {
@@ -37,5 +34,14 @@
   "main": "./chromeless",
   "homepage": "http://github.com/mikedeboer/chromeless2",
   "id": "jid1-HJ2eBf2VdjoQdw",
-  "description": "Build desktop applications with web technologies, redux."
+  "description": "Build desktop applications with web technologies, redux.",
+  "bugs": {
+    "url": "https://github.com/mikedeboer/chromeless2/issues"
+  },
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "devDependencies": {},
+  "license": "ISC"
 }

@@ -1,5 +1,7 @@
 ## Welcome To Chromeless!
 
+
+
 The 'chromeless' project is an experiment into making it possible to build
 a web browser using only web technologies, like HTML, JavaScript, and CSS.
 
@@ -39,6 +41,10 @@ This "main app HTML" is basically a normal webpage, but with several important d
 
 * OSX 10.5 and later, Windows XP and later, or probably a modern versions of linux (32 or 64 bit).
 * NodeJS 0.10.x or higher.
+* Building NodeJS dependences
+```
+npm up
+```
 
 ## Getting Started
 
