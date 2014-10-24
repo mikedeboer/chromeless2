@@ -29,11 +29,11 @@
   },
   "win": {
     "all": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013/12/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.win32.zip",
-      "md5": "7655a765c50516131c4cabde11088147",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/31.0/runtimes/xulrunner-31.0.en-US.win32.zip",
+      "md5": "4fb9f848ba630e8c2c97be59ca45d1d5",
       "bin": {
         "path": "xulrunner/xulrunner.exe",
-        "sig": "abb2962aed3adb7d71477ad3608f7165"
+        "sig": "d9be404a22909f6eb6a45c1d0c8644d6"
       }
     }
   }
