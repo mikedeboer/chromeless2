@@ -1,7 +1,7 @@
 {
   "linux": {
     "x64": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.linux-x86_64.tar.bz2",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013/12/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.linux-x86_64.tar.bz2",
       "md5": "8d793fc55a52e27c75964c2c518d2e98",
       "bin": {
         "path": "xulrunner/xulrunner",
@@ -9,7 +9,7 @@
       }
     },
     "x32": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.linux-i686.tar.bz2",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013/12/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.linux-i686.tar.bz2",
       "md5": "82940cdb2176e0dfe25f7edfb0da34c7",
       "bin": {
         "path": "xulrunner/xulrunner",
@@ -19,7 +19,7 @@
   },
   "osx": {
     "all": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.mac-x86_64.sdk.tar.bz2",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013/12/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.mac-x86_64.sdk.tar.bz2",
       "md5": "c3002e56a55c5717bd578bd6ac22ebfe",
       "bin": {
         "path": "xulrunner-sdk/bin/XUL.framework/Versions/Current/xulrunner",
@@ -29,7 +29,7 @@
   },
   "win": {
     "all": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.win32.zip",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013/12/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.win32.zip",
       "md5": "7655a765c50516131c4cabde11088147",
       "bin": {
         "path": "xulrunner/xulrunner.exe",
