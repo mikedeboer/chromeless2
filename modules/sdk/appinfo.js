@@ -184,15 +184,11 @@ function validateAppinfoProperties(manf) {
         throw e;
       }
     }
-    if (typeof pSpec.normalize == "function") {
-      normalizedManf[prop] = pSpec.normalize(manf[prop]);
-      // Special case. A normalization function can remove properties by
-      // returning undefined.
-      if (normalizedManf[prop] === undefined)
-        delete normalizedManf[prop];
-    } else {
-      normalizedManf[prop] = manf[prop];
-    }
+    normalizedManf[prop] = manf[prop];
+    if (normalizedManf[prop] === undefined)
+      delete normalizedManf[prop];
+    // Special case. A normalization function can remove properties by
+    // returning undefined.
   }
   return normalizedManf;
 }

@@ -71,6 +71,7 @@ module.exports = exports = {
 };
 
 function enableDebuggingOutputToConsole() {
+  return;
   let jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"]
               .getService(Ci.jsdIDebuggerService);
 
