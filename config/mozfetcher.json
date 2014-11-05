@@ -19,11 +19,11 @@
   },
   "osx": {
     "all": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013/12/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.mac-x86_64.sdk.tar.bz2",
-      "md5": "c3002e56a55c5717bd578bd6ac22ebfe",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/34.0b6/sdk/xulrunner-34.0b6.en-US.mac-x86_64.sdk.tar.bz2",
+      "md5": "fa564f5a2820f0b11ce5441f5bf71226",
       "bin": {
         "path": "xulrunner-sdk/bin/XUL.framework/Versions/Current/xulrunner",
-        "sig": "952aa2191458bdfce9fae66e2cbcf37f"
+        "sig": "afcfc471027abd045600971ad3de3847"
       }
     }
   },
