@@ -12,7 +12,7 @@ const ww = Cc["@mozilla.org/embedcomp/window-watcher;1"]
              .getService(Ci.nsIWindowWatcher);
 Cu.import("resource://app-bootstrap/console.js");
 
-const Observers = require("sdk/deprecated/observer-service");
+const Observers = require('sdk/system/events');
 
 const kNsXul = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 const kNsXhtml = "http://www.w3.org/1999/xhtml";
@@ -37,7 +37,8 @@ function isTopLevelWindow(w) {
   return false;
 }
 
-let checkWindows = function(subject, url) {
+let checkWindows = function(self, url) {
+  let subject = self.subject;
   let window = subject.window;
   if (window.top != window.self) {
     if (isTopLevelWindow(window.parent)) {
@@ -77,13 +78,13 @@ let checkWindows = function(subject, url) {
   }
 };
 
-Observers.add("content-document-global-created", checkWindows);
-Observers.add("chrome-document-global-created", checkWindows);
+Observers.on("content-document-global-created", checkWindows);
+Observers.on("chrome-document-global-created", checkWindows);
 
 // Forward in-browser console API calls to ours.
-Observers.add("console-api-log-event", function(data) {
+Observers.on("console-api-log-event", function(self) {
   //console.dir(data.wrappedJSObject);
-  console.fromEvent(data.wrappedJSObject);
+  console.fromEvent(self.data.wrappedJSObject);
 });
 
 function Window(options, testCallbacks) {

@@ -51,9 +51,6 @@ const {Buffer} = require("sdk/io/buffer");
 const {override} = require("api-utils");
 const {setTimeout, clearTimeout, setInterval, clearInterval} = require("sdk/timers");
 
-for (let name of ["process", "Buffer", "setTimeout", "clearTimeout", "setInterval", "clearInterval"])
-  global[name] = this[name];
-
 let appWindow = null;
 
 const kDefaultWindowWidth = 800;
@@ -202,7 +199,7 @@ exports.main = function main(options, testCallbacks) {
         // This is for tests framework to test the window exists or not:
         appWindow = null;
       }
-    }, global)
+    }, this)
   }, testCallbacks);
 };
 

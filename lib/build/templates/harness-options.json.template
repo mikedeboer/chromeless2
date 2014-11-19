@@ -6,13 +6,13 @@
     "classID": "{[%uuid%]}",
     "contractID": "@mozilla.org/harness-service;1?id=[%uuid%]"
   },
-  "loader": "resource://[%uuid%]-addon-sdk/loader.js",
+  "loader": "resource://gre/modules/commonjs/toolkit/loader.js",
   "paths": {
-    "sdk/": "resource://[%uuid%]-addon-sdk/",
+    "sdk/": "resource://gre/modules/commonjs/sdk/",
+    "toolkit/": "resource://gre/modules/commonjs/toolkit/",
     "": "resource://[%uuid%]-sdk/"
   },
   "resources": {
-    "[%uuid%]-addon-sdk": ["modules", "[%uuid%]-addon-sdk"],
     "[%uuid%]-sdk": ["modules", "[%uuid%]-sdk"]
   },
   "mainModule": "main",
@@ -25,7 +25,7 @@
     "net": "sdk/io/net",
     "timers": "sdk/timers",
     "stream": "sdk/io/stream",
-    "child_process": "sdk/system/child-process",
+    "child_process": "sdk/system/child_process",
     "subprocess/index": "sdk/subprocess/index"
   }
 }
