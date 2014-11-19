@@ -12,3 +12,4 @@ contract @mozilla.org/content-permission/prompt;1 {b6f6d8cf-ef2b-448b-a886-f3c99
 resource app-bootstrap components/
 
 content chromeless chromeless/content/
+manifest chromeless/locales/locales.manifest
