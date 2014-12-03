@@ -1,0 +1,10 @@
+{
+  "vendor": "Unknown",
+  "name": "webgl",
+  "title": "Chromeless WebGL Demo",
+  "developer_email": "unknown@unknown.com",
+  "version": "0.1.0",
+  "enableSystemPrivileges": true,
+  "resizable": true,
+  "menubar": true
+}
