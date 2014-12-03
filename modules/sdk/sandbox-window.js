@@ -24,10 +24,20 @@ const kMenubar = (typeof kAppInfo.menubar == "undefined" || kAppInfo.menubar) ?
   '</menubar></toolbox>' : "";
 const kBlankXul = '<?xml version="1.0"?>' +
                   '<?xml-stylesheet ' + 'href="chrome://global/skin/" type="text/css"?>' +
-                  '<?xml-stylesheet ' + 'type="text/css"?> ' +
-                  '<window windowtype="navigator:browser" menu="theMenuBar" style="padding: 0; ' +
-                  'border: 0; margin: 0; background-color: white;" xmlns:html="' +
-                  kNsXhtml + '" xmlns="' + kNsXul + '">' + kMenubar + '</window>';
+                  '<?xml-stylesheet ' + 'type="text/css"?>' +
+                  '<window xmlns:html="' + kNsXhtml + '"' +
+                  '        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"' +
+                  '        xmlns:svg="http://www.w3.org/2000/svg"' +
+                  '        xmlns="' + kNsXul + '"' +
+                  '        windowtype="navigator:browser"' +
+                  '        menu="theMenuBar"' +
+                  '        style="padding: 0; border: 0; margin: 0; background-color: white;"' +
+                  '        macanimationtype="document"' +
+                  '        fullscreenbutton="true"' +
+                  '        sizemode="normal"' +
+                  '>' +
+                    kMenubar +
+                  '</window>';
 
 function isTopLevelWindow(w) {
   for (let window of gWindows) {

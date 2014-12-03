@@ -12,6 +12,8 @@
     <string>appicon</string>
     <key>NSAppleScriptEnabled</key>
     <true/>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
     <key>CFBundleGetInfoString</key>
     <string>[%application_name%]</string>
     <key>CFBundleName</key>
