@@ -123,6 +123,7 @@ function Window(options, testCallbacks) {
 
   window.addEventListener("close", this, false);
   window.addEventListener("DOMContentLoaded", this, false);
+  window.addEventListener("focus", this, false);
 }
 
 Window.prototype = {
@@ -150,10 +151,12 @@ Window.prototype = {
           browser.setAttribute("style", "background:none;background-color:transparent !important");
           browser.setAttribute("flex", "1");
           browser.setAttribute("height", "100%");
-          browser.setAttribute("border", "10px solid green");
+          // browser.setAttribute("border", "10px solid green");
           event.target.documentElement.appendChild(browser);
 
           this._browser = browser;
+
+          browser.focus();
 
           let parentWindow = this._window;
           browser.addEventListener("DOMTitleChanged", evt => {
@@ -171,6 +174,9 @@ Window.prototype = {
           browser.loadURI(this.options.url);
         }
         return false;
+      case "focus":
+        if (this._browser)
+          this.browser.focus();
     }
   },
   close: function() {
