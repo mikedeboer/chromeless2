@@ -19,11 +19,11 @@
   },
   "osx": {
     "all": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/34.0b6/sdk/xulrunner-34.0b6.en-US.mac-x86_64.sdk.tar.bz2",
-      "md5": "fa564f5a2820f0b11ce5441f5bf71226",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/36.0/sdk/xulrunner-36.0.en-US.mac-x86_64.sdk.tar.bz2",
+      "md5": "0c2adad788e65a0a29ba429af5fd40bc",
       "bin": {
         "path": "xulrunner-sdk/bin/XUL.framework/Versions/Current/xulrunner",
-        "sig": "afcfc471027abd045600971ad3de3847"
+        "sig": "2a56888ef739b337961d03fad942bcff"
       }
     }
   },

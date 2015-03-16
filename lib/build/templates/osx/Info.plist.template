@@ -7,7 +7,7 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleExecutable</key>
-    <string>xulrunner</string>
+    <string>xulrunner-stub</string>
     <key>CFBundleIconFile</key>
     <string>appicon</string>
     <key>NSAppleScriptEnabled</key>
@@ -24,5 +24,16 @@
     <string>[%full_version%]</string>
     <key>CFBundleIdentifier</key>
     <string>org.mozilla.xulrunner.[%application_shortname%]</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.6</string>
+    <key>LSMinimumSystemVersionByArchitecture</key>
+    <dict>
+        <key>i386</key>
+        <string>10.6.0</string>
+        <key>x86_64</key>
+        <string>10.6.0</string>
+    </dict>
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
   </dict>
 </plist>

@@ -1,6 +1,7 @@
 [App]
 Vendor=[%application_vendor%]
 Name=[%application_name%]
+RemotingName=[%application_shortname%]
 Version=[%short_version%]
 BuildID=[%build_id%]
 Copyright=
@@ -8,7 +9,4 @@ ID=[%developer_email%]
 
 [Gecko]
 MinVersion=25.0
-MaxVersion=34.1024
-
-[XRE]
-EnableExtensionManager=true
+MaxVersion=39.0
