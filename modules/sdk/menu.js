@@ -1,5 +1,3 @@
-/* -*- Mode: Java; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
-/* vim:set ts=4 sw=4 sts=4 et: */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -34,27 +32,12 @@ const {Cc, Ci, Cr} = require("chrome");
 const {Class} = require("sdk/core/heritage");
 const utils   = require("api-utils");
 const hotkeys = require("hotkey");
-const ui      = require("ui");
-const _slice  = Array.prototype.slice;
-const kNsXul  = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+const kNSXUL  = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
 function mixin(obj, mixin) {
   for (let key in mixin)
     obj[key.toLowerCase()] = mixin[key];
 };
-
-function getType(obj) {
-  if ("draw" in obj) {
-    if ("label" in obj) {
-      if (obj.label == "-")
-        return "separator";
-      return "menu";
-    }
-    if ("length" in obj)
-      return "submenu";
-  }
-  return "other";
-}
 
 /*
  * Sets the parentNode of a Menu, SubMenu or Seperator instance and its children.
@@ -64,26 +47,38 @@ function getType(obj) {
  * Each instance of Menu, SubMenu and Seperator have this function set as member
  * property.
  *
- * @param {mixed} parent Parent node, which may be a XulElement, Menu or SubMenu
+ * @param {mixed} parent Parent node, which may be a XULElement, Menu or SubMenu
  * @type  {void}
  * @private
  */
 function setParent(parent) {
   if (!parent)
     return;
-  this.parent = parent;
-  let parentType = getType(parent);
-  if ((parentType == "menu" || parentType == "submenu") && parent.drawn) {
+
+  if ((parent instanceof Menu || parent instanceof SubMenu) && parent.node) {
+    // An instance of 'Menu' or 'SubMenu' was passed in.
     this.parentNode = parent.node;
-    this.draw();
+  } else if (parent.documentElement) {
+    // Assume it's a (hidden) document.
+    let menu = parent.documentElement.appendChild(parent.createElement("menu"));
+    this.parentNode = menu.appendChild(parent.createElement("menupopup"));
   } else if (parent.ownerDocument) {
+    // A regular (DOM)Node is passed in.
     this.parentNode = parent;
-    this.draw();
+  } else {
+    return;
   }
+
+  // We now have a parentNode, so we can draw something!
+  this.draw();
+
   if (this.length) {
     for (let i = 0, l = this.length; i < l; ++i)
       this[i].setParent && this[i].setParent(this);
   }
+
+  this.parent = parent;
+
   if (this.children && this.children.length)
     this.children.setParent(this);
 }
@@ -94,7 +89,8 @@ function commandHandler(e) {
     this.node.setAttribute("checked", this.checked);
   }
 
-  this["onclick"] && this["onclick"](e);
+  if (this.onclick)
+    this.onclick(e);
 }
 
 /**
@@ -138,21 +134,20 @@ function commandHandler(e) {
  */
 const Menu = Class({
   initialize: function(struct) {
-    this.drawn = false;
+    this.node = null;
     this.parentNode = null;
     mixin(this, struct);
     this.children = this.children && this.children.length ? this.children : [];
 
     if (this.children.length) {
-        // verify proper mutual exclusivity
-        let _self = this;
-        var offending = ["hotkey", "image", "enabled", "onclick", "name"].filter(function(f) {
-          return _self[f] != undefined;
-        });
-        if (offending.length > 0) {
-          throw "menuitems with children may not also have: '" +
-            offending.join("' nor '") + "'";
-        }
+      // verify proper mutual exclusivity
+      let offending = ["hotkey", "image", "enabled", "onclick", "name"].filter(f => {
+        return typeof this[f] != "undefined";
+      });
+      if (offending.length > 0) {
+        throw new Error("menuitems with children may not also have: '" +
+                        offending.join("' nor '") + "'");
+      }
     }
 
     this.children = new SubMenu(this.children, this);
@@ -161,36 +156,37 @@ const Menu = Class({
     let propMap   = {
       hotkey: "key"
     };
-    let _self     = this;
-    let label     = this.label;
-    let hotkey    = this.hotkey;
-    let image     = this.image;
-    let type      = this.type;
-    let checked   = this.checked;
-    let autocheck = this.autocheck;
-    let disabled  = this.disabled;
-    let name      = this.name;
-    ["label", "hotkey", "image", "type", "disabled"].forEach(function(prop) {
-      this.__defineGetter__(prop, function() { return eval(prop); });
-      this.__defineSetter__(prop, function(val) {
-        eval(prop + " = val");
-        if (!this.drawn || this.children.length)
-          return;
-        if (prop == "hotkey")
-          return this.setHotkey();
-        this.node.setAttribute(propMap[prop] || prop, val);
-      });
-    });
 
-    ["checked", "autocheck", "name"].forEach(function(prop) {
-      this.__defineGetter__(prop, function() { return eval(prop); });
-      this.__defineSetter__(prop, function(val) {
-        eval(prop + " = val");
-        if (!this.drawn || this.children.length || "checkbox|radio".indexOf(val) === -1)
-          return;
-        this.node.setAttribute(propMap[prop] || prop, val);
+    let props = {
+      label: this.label,
+      hotkey: this.hotkey,
+      image: this.image,
+      type: this.type,
+      checked: this.checked,
+      autocheck: this.autocheck,
+      disabled: this.disabled,
+      name: this.name
+    };
+
+    for (let prop of Object.getOwnPropertyNames(props)) {
+      let propToDefine = prop;
+      Object.defineProperty(this, propToDefine, {
+        get: () => props[propToDefine],
+        set: val => {
+          props[propToDefine] = val;
+          if (!this.node || this.children.length)
+            return;
+          if (["checked", "autocheck", "name"].indexOf(propToDefine) !== -1 &&
+              "checkbox|radio".indexOf(val) === -1) {
+            return;
+          }
+          if (propToDefine == "hotkey")
+            return this.setHotkey();
+
+          this.node.setAttribute(propMap[propToDefine] || propToDefine, val);
+        }
       });
-    });
+    }
   },
 
   /**
@@ -201,17 +197,15 @@ const Menu = Class({
    * @type {void}
    */
   draw: function() {
-    if (this.drawn)
+    if (this.node)
       return;
 
     // generate a menu and a menu popup
     let hasChildren = this.children.length;
-    this.node = this.parentNode.ownerDocument.createElementNS(kNsXul, hasChildren ? "menu" : "menuitem");
+    this.node = this.parentNode.ownerDocument.createElementNS(kNSXUL, hasChildren ? "menu" : "menuitem");
     this.node.className = hasChildren ? "menu-iconic" : "menuitem-iconic";
     this.node.setAttribute("label", this.label);
     this.parentNode.appendChild(this.node);
-
-    this.drawn = true;
 
     if (hasChildren) {
       this.children.setParent(this);
@@ -246,14 +240,14 @@ const Menu = Class({
    * @type {void}
    */
   redraw: function() {
-    if (!this.drawn)
-      return this.parent && this.parent.drawn ? this.setParent(this.parent) : null;
+    if (!this.node)
+      return this.parent && this.parent.node ? this.setParent(this.parent) : null;
     let hasChildren = this.children.length;
     if (!hasChildren || (hasChildren && this.node.tagName.toLowerCase() == "menu"))
       return; // no redraw needed, already the right setup!
 
     this.parentNode.removeChild(this.node);
-    this.drawn = false;
+    this.node = null;
     this.hotkey = this.image = this.disabled = this.type =
       this.checked = this.autocheck = this.name = null;
     this.draw();
@@ -268,10 +262,10 @@ const Menu = Class({
    * @type {void}
    */
   setHotkey: function() {
-    if (!this.drawn || this.children.length || !this.hotkey)
+    if (!this.node || this.children.length || !this.hotkey)
       return;
 
-    let id = "menu_" + ui.getUUID();
+    let id = "menu_" + utils.getUUID();
     hotkeys.register(this.hotkey, commandHandler.bind(this), id);
     this.node.setAttribute("key", id);
   },
@@ -285,13 +279,13 @@ const Menu = Class({
    * @type {void}
    */
   destroy: function() {
-    if (!this.drawn)
+    if (!this.node)
       return;
     if (this.children.length)
       this.children.destroy();
     this.parentNode.removeChild(this.node);
     delete this.node;
-    this.drawn = false;
+    this.node = null;
   },
 
   /**
@@ -343,7 +337,7 @@ const Menu = Class({
  */
 let struct = {
   initialize: function(nodes, parent) {
-    this.drawn = false;
+    this.node = null;
     this.parent = parent;
     this.parentNode = null;
 
@@ -360,12 +354,11 @@ let struct = {
    * @type {void}
    */
   draw: function() {
-    if (this.drawn || !this.parent.drawn)
+    if (this.node || !this.parent.node)
       return;
 
-    this.node = this.parentNode.ownerDocument.createElementNS(kNsXul, "menupopup");
+    this.node = this.parentNode.ownerDocument.createElementNS(kNSXUL, "menupopup");
     this.parentNode.appendChild(this.node);
-    this.drawn = true;
     return this.node;
   },
 
@@ -377,7 +370,7 @@ let struct = {
    * @type {void}
    */
   destroy: function() {
-    if (!this.drawn)
+    if (!this.node)
       return;
     this.parentNode.removeChild(this.node);
     // make sure to destroy leafs too:
@@ -386,8 +379,7 @@ let struct = {
       --this.length;
       delete this[i];
     }
-    delete this.node;
-    this.drawn = false;
+    this.node = null;
   },
 
   /**
@@ -395,14 +387,14 @@ let struct = {
    * Adds one or more elements to the end of an array and returns the new 
    * length of the array.
    */
-  push: function() {
-    var args = _slice.call(arguments);
-    for (let i = 0, l = args.length; i < l; ++i) {
-      this[this.length] = args[i];
+  push: function(...args) {
+    for (let arg of args) {
+      this[this.length] = arg;
       ++this.length;
-      args[i].setParent(this);
+      arg.setParent(this);
     }
-    this.parent.redraw && this.parent.redraw();
+    if (this.parent.redraw)
+      this.parent.redraw();
     return this.length;
   },
 
@@ -413,7 +405,7 @@ let struct = {
    * @type {array}
    */
   toArray: function() {
-    var mock = [];
+    let mock = [];
     for (let i = 0, l = this.length; i < l; ++i)
       mock.push(this[i]);
     return mock;
@@ -435,11 +427,7 @@ let struct = {
       delete this[i];
     }
     this.length = 0;
-    for (i = 0, l = arr.length; i < l; ++i) {
-      el = arr[i];
-      next = arr[i + 1];
-      this.push(el);
-    }
+    this.push(...arr);
   },
 
   /**
@@ -455,9 +443,9 @@ let struct = {
 /** @function splice */
 /** @function unshift */
 ["reverse", "shift", "sort", "splice", "unshift"].forEach(function(func) {
-  struct[func] = function() {
+  struct[func] = function(...args) {
     let els = this.toArray();
-    els[func].apply(els, _slice.call(arguments));
+    els[func](...args);
     this.fromArray(els);
   };
 });
@@ -498,7 +486,7 @@ const SubMenu = Class(struct);
  */
 const Separator = Class({
   initialize: function(parent) {
-    this.drawn = false;
+    this.node = null;
     this.parentNode = null;
     this.label = "-";
     setParent.call(this, parent);
@@ -512,11 +500,10 @@ const Separator = Class({
    * @type {void}
    */
   draw: function() {
-    if (this.drawn)
+    if (this.node)
       return;
     this.node = this.parentNode.appendChild(
-      this.parentNode.ownerDocument.createElementNS(kNsXul, "menuseparator"));
-    this.drawn = true;
+      this.parentNode.ownerDocument.createElementNS(kNSXUL, "menuseparator"));
     return this.node;
   },
 
@@ -528,11 +515,10 @@ const Separator = Class({
    * @type {void}
    */
   destroy: function() {
-    if (!this.drawn)
+    if (!this.node)
       return;
     this.parentNode.removeChild(this.node);
-    delete this.node;
-    this.drawn = false;
+    this.node = null;
   },
 
   /**
