@@ -41,7 +41,7 @@
 
 "use strict";
 
-const {Cu} = require("chrome");
+const {Cu, Cc, Ci} = require("chrome");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -205,3 +205,9 @@ function requirementError(key, requirement, expected) {
   }
   return new Error(msg);
 }
+
+exports.getUUID = function() {
+  let uuidGenerator = Cc["@mozilla.org/uuid-generator;1"]
+                        .getService(Ci.nsIUUIDGenerator);
+  return uuidGenerator.generateUUID().toString();
+};
