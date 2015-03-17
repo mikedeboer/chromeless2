@@ -11,14 +11,14 @@ var Async = require("async");
 var Multi = require("multimeter");
 var Mkdirp = require("mkdirp");
 
-var Util = require("./lib/util");
-var Mozfetcher = require("./lib/mozfetcher");
-var Moztarball = require("./lib/moztarball");
-var Build = require("./lib/build");
-var DepsCheck = require("./lib/depscheck");
+var Util = require("../lib/util");
+var Mozfetcher = require("../lib/mozfetcher");
+var Moztarball = require("../lib/moztarball");
+var Build = require("../lib/build");
+var DepsCheck = require("../lib/depscheck");
 
 var Optimist = require("optimist");
-var Manifest = JSON.parse(Fs.readFileSync(Path.join(__dirname, "package.json"), "utf8"));
+var Manifest = JSON.parse(Fs.readFileSync("package.json", "utf8"));
 var argv = Optimist
   .wrap(80)
   .usage("Chromeless v" + Manifest.version + "\n" +
