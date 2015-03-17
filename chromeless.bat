@@ -1,2 +1,2 @@
-call node %~dp0chromeless %*
+call node %~dp0bin\gecko.js %*
 pause

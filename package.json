@@ -13,16 +13,17 @@
   },
   "version": "2.0.0",
   "dependencies": {
-    "unzip": "~0.1.9",
-    "multimeter": "~0.1.1",
-    "mkdirp": "~0.3.5",
-    "tar": "~0.1.18",
-    "rimraf": "~2.2.2",
-    "ncp": "~0.4.2",
     "async": "~0.2.9",
-    "uuid": "~1.4.1",
+    "mkdirp": "~0.3.5",
+    "multimeter": "~0.1.1",
+    "ncp": "~0.4.2",
     "optimist": "~0.6.0",
-    "semver": "~2.2.1"
+    "promise": "^6.1.0",
+    "rimraf": "~2.2.2",
+    "semver": "~2.2.1",
+    "tar": "~0.1.18",
+    "unzip": "~0.1.9",
+    "uuid": "~1.4.1"
   },
   "bin": {
     "gulp": "./bin/gecko.js"

@@ -13,7 +13,6 @@ var Mkdirp = require("mkdirp");
 
 var Util = require("../lib/util");
 var Mozfetcher = require("../lib/mozfetcher");
-var Moztarball = require("../lib/moztarball");
 var Build = require("../lib/build");
 var DepsCheck = require("../lib/depscheck");
 
@@ -110,30 +109,7 @@ Mkdirp(buildDir, function(err) {
         // Tack path to the xulrunner executable on `os`, to reuse later in run()!
         os.xulrunnerPath = fetcher.getXulrunnerPath();
 
-        fetcher.fetchIfNeeded(function(err, tarball) {
-          if (err)
-            nextOS(err);
-
-          if (tarball) {
-            new Moztarball(buildDir, multi).unpack(tarball || fetcher.getArchivePath(), function(err) {
-              if (err)
-                nextOS(err);
-
-              // If after all that we still think we need to fetch the thing, that means
-              // unpacked bits don't match expected signatures. Safest to purge them
-              // from disk and/or refuse to run.
-              fetcher.needsFetch(function(err, needsFetch, msg) {
-                if (!err && needsFetch) {
-                  err = "Signature mismatch in unpacked xulrunner contents.  Eep!\n" +
-                        (msg || "");
-                }
-                nextOS(err);
-              });
-            });
-          } else {
-            nextOS();
-          }
-        });
+        fetcher.fetchIfNeeded(nextOS);
       },
       function(err) {
         if (err)
