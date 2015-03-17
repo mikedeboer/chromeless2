@@ -1,39 +1,35 @@
 {
   "linux": {
     "x64": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013/12/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.linux-x86_64.tar.bz2",
-      "md5": "8d793fc55a52e27c75964c2c518d2e98",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/36.0.1/sdk/xulrunner-36.0.1.en-US.linux-x86_64.sdk.tar.bz2",
+      "md5": "3c11f92fa6b2dac17de8a76cb6bbde91",
       "bin": {
-        "path": "xulrunner/xulrunner",
-        "sig": "73ad531bb7c8aed00e7ee7e751667356"
+        "path": "xulrunner/xulrunner"
       }
     },
     "x32": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/nightly/2013/12/2013-12-18-00-40-01-mozilla-aurora/xulrunner-28.0a2.en-US.linux-i686.tar.bz2",
-      "md5": "82940cdb2176e0dfe25f7edfb0da34c7",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/36.0.1/sdk/xulrunner-36.0.1.en-US.linux-i686.sdk.tar.bz2",
+      "md5": "a6abc71ec9e81cbdbfc56bc453e3f988",
       "bin": {
-        "path": "xulrunner/xulrunner",
-        "sig": "360d2de47a9e95096d2d53e6c784cd49"
+        "path": "xulrunner/xulrunner"
       }
     }
   },
   "osx": {
     "all": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/36.0/sdk/xulrunner-36.0.en-US.mac-x86_64.sdk.tar.bz2",
-      "md5": "0c2adad788e65a0a29ba429af5fd40bc",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/36.0.1/sdk/xulrunner-36.0.1.en-US.mac-x86_64.sdk.tar.bz2",
+      "md5": "a6f9aaf869ffe354b33ecb855a5cb884",
       "bin": {
-        "path": "xulrunner-sdk/bin/XUL.framework/Versions/Current/xulrunner",
-        "sig": "2a56888ef739b337961d03fad942bcff"
+        "path": "xulrunner-sdk/bin/XUL.framework/Versions/Current/xulrunner"
       }
     }
   },
   "win": {
     "all": {
-      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/31.0/runtimes/xulrunner-31.0.en-US.win32.zip",
-      "md5": "4fb9f848ba630e8c2c97be59ca45d1d5",
+      "url": "http://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/36.0.1/sdk/xulrunner-36.0.1.en-US.win32.sdk.zip",
+      "md5": "adf0d81356bd390cf2ad4442350a74d1",
       "bin": {
-        "path": "xulrunner/xulrunner.exe",
-        "sig": "d9be404a22909f6eb6a45c1d0c8644d6"
+        "path": "xulrunner/xulrunner.exe"
       }
     }
   }
