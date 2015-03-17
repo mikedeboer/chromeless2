@@ -24,14 +24,18 @@
     "optimist": "~0.6.0",
     "semver": "~2.2.1"
   },
-  "scripts": {},
+  "bin": {
+    "gulp": "./bin/gecko.js"
+  },
+  "scripts": {
+    "test": "./bin/gecko.js test"
+  },
   "licenses": [
     {
       "url": "http://www.opensource.org/licenses/mit-license.php",
       "type": "The MIT License"
     }
   ],
-  "main": "./chromeless",
   "homepage": "http://github.com/mikedeboer/chromeless2",
   "id": "jid1-HJ2eBf2VdjoQdw",
   "description": "Build desktop applications with web technologies, redux.",
