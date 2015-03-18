@@ -9,6 +9,7 @@ var Path = require("path");
 var Fs = require("fs");
 var Async = require("async");
 var Mkdirp = require("mkdirp");
+var child_process = require('child_process');
 
 var Util = require("../lib/util");
 var Mozfetcher = require("../lib/mozfetcher");
@@ -116,10 +117,14 @@ Mkdirp(buildDir, function(err) {
 
 function run() {
   // DONE! Alright, now we can finally start doing something interesting...
+  var runOptions = {};
   Async.eachSeries(argv.apps,
     function(app, nextApp) {
       Async.eachSeries(argv.os,
         function(os, nextOS) {
+          runOptions.os = os;
+          runOptions.app  = app;
+          runOptions.buildDir  = buildDir;
           Build.appify(os, app, buildDir, argv.verbose, nextOS);
         },
         nextApp);
@@ -127,6 +132,33 @@ function run() {
     function(err) {
       if (err)
         exitWithError(err);
-      process.exit();
+      if (!argv.run) {
+        console.log("Finished");
+        process.exit();
+      }
+      runApp(runOptions)
     });
+}
+
+function runApp(runOptions) {
+  console.log("Start running:" + JSON.stringify(runOptions));
+  var finalBinaryPath = runOptions.os.finalBinaryPath;
+
+  var child = child_process.spawn(finalBinaryPath, ['-jsconsole', '-purgecaches'], {
+    detached: true,
+    env: process.env,
+    cwd: Path.dirname(finalBinaryPath),
+  });
+  child.stdout.setEncoding('utf8');
+  child.stdout.on('data', function(data) {
+    process.stdout.write(data);
+  });
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', function(data) {
+    process.stderr.write(data);
+  });
+
+  child.on('error', function(err) {
+    console.log(err);
+  });
 }
