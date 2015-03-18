@@ -1,6 +1,6 @@
 {
   "modules": {
-    "sdk": {
+    "shell-sdk": {
       "path": ["sdk"],
       "exclude": [],
       "include": [],

@@ -10,10 +10,10 @@
   "paths": {
     "sdk/": "resource://gre/modules/commonjs/sdk/",
     "toolkit/": "resource://gre/modules/commonjs/toolkit/",
-    "": "resource://[%uuid%]-sdk/"
+    "": "resource://shell-sdk/"
   },
   "resources": {
-    "[%uuid%]-sdk": ["modules", "[%uuid%]-sdk"]
+    "shell-sdk": ["modules", "shell-sdk"]
   },
   "mainModule": "main",
   "staticArgs": {
