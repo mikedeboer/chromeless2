@@ -8,7 +8,6 @@
 var Path = require("path");
 var Fs = require("fs");
 var Async = require("async");
-var Multi = require("multimeter");
 var Mkdirp = require("mkdirp");
 
 var Util = require("../lib/util");
@@ -51,8 +50,6 @@ argv = Util.sanitizeArguments(argv);
 function onExit(ex) {
   if (argv.verbose)
     Util.log("Exiting...");
-  if (multi)
-    multi.destroy();
   if (ex) {
     console.trace();
     throw ex;
@@ -71,8 +68,6 @@ function exitWithError(err, code) {
     Util.log(err, "error");
   process.exit(code || 1);
 }
-
-var multi = Multi(process);
 
 // set the "build directory", where we'll output built artifacts, download
 // xulrunner, etc.
@@ -105,7 +100,7 @@ Mkdirp(buildDir, function(err) {
     // Then we'll check if the necessary xulrunner is present for all OSes to build:
     Async.eachSeries(argv.os,
       function(os, nextOS) {
-        var fetcher = new Mozfetcher(buildDir, multi, os.platform, os.arch);
+        var fetcher = new Mozfetcher(buildDir, os.platform, os.arch);
         // Tack path to the xulrunner executable on `os`, to reuse later in run()!
         os.xulrunnerPath = fetcher.getXulrunnerPath();
 
@@ -125,7 +120,7 @@ function run() {
     function(app, nextApp) {
       Async.eachSeries(argv.os,
         function(os, nextOS) {
-          Build.appify(os, app, buildDir, multi, argv.verbose, nextOS);
+          Build.appify(os, app, buildDir, argv.verbose, nextOS);
         },
         nextApp);
     },
